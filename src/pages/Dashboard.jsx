@@ -223,6 +223,28 @@ export const Dashboard = () => {
             }
 
             setExpenses(expenseData);
+
+            // Auto-repair: Check if currentCycle has a valid stage
+            if (currentCycle && sortedStages.length > 0) {
+                const currentStageValid = sortedStages.find(s => s.id === currentCycle.currentStageId);
+                if (!currentStageValid) {
+                    console.warn("Current cycle has invalid stage ID. Auto-repairing to first stage...");
+                    const firstStage = sortedStages[0];
+                    // Update via API
+                    await api.updateCycle(currentCycle.id, { currentStageId: firstStage.id });
+                    // Update local state (though a reload might be safer, let's update local cycle list)
+                    // Actually, updateCycleStage in context handles this, but we are in Dashboard.
+                    // We can call updateCycleStage from context if we want to sync everything.
+                    // But wait, updateCycleStage updates currentCycle in context.
+                    // Let's use the context function if available, or just api.
+                    // We have updateCycleStage from useFarm().
+                    await updateCycleStage(firstStage.id);
+                    // Force a re-render or let the context update propagate?
+                    // updateCycleStage updates the context state, so it should trigger a re-render of Dashboard
+                    // because Dashboard depends on currentCycle from context.
+                }
+            }
+
         } catch (error) {
             console.error("Failed to load dashboard data (General Error)", error);
         } finally {
