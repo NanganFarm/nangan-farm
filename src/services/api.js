@@ -27,6 +27,28 @@ export const api = {
     },
 
     async deleteFarm(id) {
+        // 1. Delete Expenses
+        const { error: expenseError } = await supabase
+            .from('expenses')
+            .delete()
+            .eq('farm_id', id);
+        if (expenseError) throw expenseError;
+
+        // 2. Delete Cycles
+        const { error: cycleError } = await supabase
+            .from('cycles')
+            .delete()
+            .eq('farm_id', id);
+        if (cycleError) throw cycleError;
+
+        // 3. Delete Zones
+        const { error: zoneError } = await supabase
+            .from('zones')
+            .delete()
+            .eq('farm_id', id);
+        if (zoneError) throw zoneError;
+
+        // 4. Delete Farm
         const { error } = await supabase
             .from('farms')
             .delete()
