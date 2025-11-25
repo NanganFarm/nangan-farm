@@ -352,7 +352,14 @@ export const api = {
                 .select('*')
                 .order('order', { ascending: true });
 
-            if (error) throw error;
+            if (error) {
+                // If table is missing (404), we can't insert. Just return defaults.
+                if (error.code === '404' || error.message?.includes('Not Found')) {
+                    console.warn("Stages table not found. Using defaults.");
+                    return DEFAULT_STAGES;
+                }
+                throw error;
+            }
 
             if (!data || data.length === 0) {
                 console.log("Seeding default stages...");
@@ -361,7 +368,11 @@ export const api = {
                     .insert(DEFAULT_STAGES)
                     .select();
 
-                if (insertError) throw insertError;
+                if (insertError) {
+                    // If insert fails (e.g. table missing), return defaults
+                    console.warn("Failed to seed stages. Using defaults.", insertError);
+                    return DEFAULT_STAGES;
+                }
                 return inserted;
             }
             return data;
