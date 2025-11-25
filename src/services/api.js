@@ -102,8 +102,8 @@ export const api = {
                     name: zone.name,
                     area: zone.area,
                     farm_id: zone.farmId,
-                    user_id: zone.userId, // We need to ensure this is passed
-                    location: zone.location
+                    user_id: zone.userId // We need to ensure this is passed
+                    // location: zone.location, // Removed as column missing in DB
                     // crop: zone.crop // Removed as column missing in DB
                 }
             ])
@@ -119,7 +119,8 @@ export const api = {
             ...data,
             farmId: data.farm_id,
             userId: data.user_id,
-            crop: zone.crop // Return it back so UI doesn't break immediately, though it won't persist
+            location: zone.location, // Return it back so UI doesn't break
+            crop: zone.crop // Return it back so UI doesn't break
         };
     },
 
@@ -128,7 +129,7 @@ export const api = {
         const dbUpdates = {};
         if (updates.name) dbUpdates.name = updates.name;
         if (updates.area) dbUpdates.area = updates.area;
-        if (updates.location) dbUpdates.location = updates.location;
+        // if (updates.location) dbUpdates.location = updates.location; // Removed as column missing in DB
         // if (updates.crop) dbUpdates.crop = updates.crop; // Removed as column missing in DB
 
         const { data, error } = await supabase
@@ -143,6 +144,7 @@ export const api = {
             ...data,
             farmId: data.farm_id,
             userId: data.user_id,
+            location: updates.location || data.location, // Return it back
             crop: updates.crop || data.crop // Return it back
         };
     },
