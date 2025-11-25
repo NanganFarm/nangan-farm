@@ -104,7 +104,8 @@ export const api = {
                     farm_id: zone.farmId,
                     user_id: zone.userId, // We need to ensure this is passed
                     location: zone.location,
-                    crop: zone.crop
+                    crop: zone.crop,
+                    coordinates: zone.coordinates ? JSON.stringify(zone.coordinates) : null
                 }
             ])
             .select()
@@ -120,7 +121,8 @@ export const api = {
             farmId: data.farm_id,
             userId: data.user_id,
             location: data.location,
-            crop: data.crop
+            crop: data.crop,
+            coordinates: data.coordinates
         };
     },
 
@@ -131,6 +133,7 @@ export const api = {
         if (updates.area) dbUpdates.area = parseFloat(updates.area.toString().replace(/[^0-9.]/g, '')) || 0; // Sanitize area
         if (updates.location) dbUpdates.location = updates.location;
         if (updates.crop) dbUpdates.crop = updates.crop;
+        if (updates.coordinates) dbUpdates.coordinates = JSON.stringify(updates.coordinates);
 
         const { data, error } = await supabase
             .from('zones')

@@ -1,24 +1,27 @@
 import React, { useState } from 'react';
 import { useFarm } from '../context/FarmContext';
-import { Plus, MapPin, Trash2, Sprout, Ruler, ArrowRight, Pencil } from 'lucide-react';
+import { Plus, MapPin, Trash2, Sprout, Ruler, ArrowRight, Pencil, List, Map as MapIcon } from 'lucide-react';
 import { Modal } from '../components/Modal';
 import { useNavigate } from 'react-router-dom';
+import MapComponent from '../components/MapComponent';
 
 export const Zones = () => {
     const { zones, addZone, updateZone, deleteZone, currentFarm, enterZone } = useFarm();
     const navigate = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingZone, setEditingZone] = useState(null);
+    const [viewMode, setViewMode] = useState('list'); // 'list' or 'map'
     const [formData, setFormData] = useState({
         name: '',
         area: '',
         location: '',
-        crop: ''
+        crop: '',
+        coordinates: null
     });
 
     const openAddModal = () => {
         setEditingZone(null);
-        setFormData({ name: '', area: '', location: '', crop: '' });
+        setFormData({ name: '', area: '', location: '', crop: '', coordinates: null });
         setIsModalOpen(true);
     };
 
@@ -28,8 +31,15 @@ export const Zones = () => {
             name: zone.name,
             area: zone.area,
             location: zone.location || '',
-            crop: zone.crop || ''
+            crop: zone.crop || '',
+            coordinates: zone.coordinates
         });
+        setIsModalOpen(true);
+    };
+
+    const handleZoneCreated = (coordinates) => {
+        setEditingZone(null);
+        setFormData({ name: '', area: '', location: '', crop: '', coordinates });
         setIsModalOpen(true);
     };
 
@@ -48,7 +58,7 @@ export const Zones = () => {
             }
             setIsModalOpen(false);
             setEditingZone(null);
-            setFormData({ name: '', area: '', location: '', crop: '' });
+            setFormData({ name: '', area: '', location: '', crop: '', coordinates: null });
         } catch (error) {
             console.error("Failed to save zone", error);
             alert(`Failed to save zone: ${error.message || error.error_description || "Unknown error"}`);
@@ -74,73 +84,103 @@ export const Zones = () => {
                     <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Zones</h2>
                     <p className="text-gray-500 dark:text-gray-400">Manage land portions for <span className="font-medium text-gray-900 dark:text-white">{currentFarm?.name}</span>.</p>
                 </div>
-                <button
-                    onClick={openAddModal}
-                    className="btn btn-primary shadow-lg shadow-emerald-900/20"
-                >
-                    <Plus size={18} />
-                    Add Zone
-                </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {zones.length === 0 ? (
-                    <div className="col-span-full text-center py-12 bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">
-                        <MapPin size={48} className="mx-auto text-gray-300 dark:text-gray-600 mb-3" />
-                        <p className="text-gray-500 dark:text-gray-400">No zones added yet.</p>
-                        <button onClick={openAddModal} className="text-emerald-600 font-medium mt-2 hover:underline">Create your first zone</button>
+                <div className="flex gap-2">
+                    <div className="bg-gray-100 dark:bg-gray-700 p-1 rounded-lg flex">
+                        <button
+                            onClick={() => setViewMode('list')}
+                            className={`p-2 rounded-md transition-colors ${viewMode === 'list' ? 'bg-white dark:bg-gray-600 shadow-sm text-emerald-600' : 'text-gray-500 dark:text-gray-400'}`}
+                            title="List View"
+                        >
+                            <List size={20} />
+                        </button>
+                        <button
+                            onClick={() => setViewMode('map')}
+                            className={`p-2 rounded-md transition-colors ${viewMode === 'map' ? 'bg-white dark:bg-gray-600 shadow-sm text-emerald-600' : 'text-gray-500 dark:text-gray-400'}`}
+                            title="Map View"
+                        >
+                            <MapIcon size={20} />
+                        </button>
                     </div>
-                ) : (
-                    zones.map(zone => (
-                        <div key={zone.id} className="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow group relative">
-                            <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button
-                                    onClick={() => openEditModal(zone)}
-                                    className="text-gray-400 hover:text-emerald-500"
-                                    title="Edit Zone"
-                                >
-                                    <Pencil size={16} />
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(zone.id)}
-                                    className="text-gray-400 hover:text-red-500"
-                                    title="Delete Zone"
-                                >
-                                    <Trash2 size={16} />
-                                </button>
-                            </div>
-
-                            <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-3 pr-16">{zone.name}</h3>
-
-                            <div className="space-y-2 text-sm">
-                                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-                                    <Ruler size={16} className="text-emerald-500" />
-                                    <span>{zone.area}</span>
-                                </div>
-                                {zone.crop && (
-                                    <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-                                        <Sprout size={16} className="text-emerald-500" />
-                                        <span>{zone.crop}</span>
-                                    </div>
-                                )}
-                                {zone.location && (
-                                    <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-                                        <MapPin size={16} className="text-emerald-500" />
-                                        <span>{zone.location}</span>
-                                    </div>
-                                )}
-                            </div>
-
-                            <button
-                                onClick={() => handleEnterZone(zone)}
-                                className="w-full mt-4 flex items-center justify-center gap-2 bg-emerald-50 text-emerald-700 py-2 rounded-lg hover:bg-emerald-100 transition-colors font-medium"
-                            >
-                                Manage Zone <ArrowRight size={16} />
-                            </button>
-                        </div>
-                    ))
-                )}
+                    <button
+                        onClick={openAddModal}
+                        className="btn btn-primary shadow-lg shadow-emerald-900/20"
+                    >
+                        <Plus size={18} />
+                        Add Zone
+                    </button>
+                </div>
             </div>
+
+            {viewMode === 'map' ? (
+                <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                    <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg text-sm">
+                        <strong>How to use:</strong> Use the drawing tools on the top right of the map to draw your zone boundaries. When you finish drawing a shape, the "Add Zone" form will open automatically.
+                    </div>
+                    <MapComponent
+                        zones={zones}
+                        onZoneCreated={handleZoneCreated}
+                    />
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {zones.length === 0 ? (
+                        <div className="col-span-full text-center py-12 bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">
+                            <MapPin size={48} className="mx-auto text-gray-300 dark:text-gray-600 mb-3" />
+                            <p className="text-gray-500 dark:text-gray-400">No zones added yet.</p>
+                            <button onClick={openAddModal} className="text-emerald-600 font-medium mt-2 hover:underline">Create your first zone</button>
+                        </div>
+                    ) : (
+                        zones.map(zone => (
+                            <div key={zone.id} className="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow group relative">
+                                <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button
+                                        onClick={() => openEditModal(zone)}
+                                        className="text-gray-400 hover:text-emerald-500"
+                                        title="Edit Zone"
+                                    >
+                                        <Pencil size={16} />
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(zone.id)}
+                                        className="text-gray-400 hover:text-red-500"
+                                        title="Delete Zone"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
+
+                                <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-3 pr-16">{zone.name}</h3>
+
+                                <div className="space-y-2 text-sm">
+                                    <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                                        <Ruler size={16} className="text-emerald-500" />
+                                        <span>{zone.area}</span>
+                                    </div>
+                                    {zone.crop && (
+                                        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                                            <Sprout size={16} className="text-emerald-500" />
+                                            <span>{zone.crop}</span>
+                                        </div>
+                                    )}
+                                    {zone.location && (
+                                        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                                            <MapPin size={16} className="text-emerald-500" />
+                                            <span>{zone.location}</span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <button
+                                    onClick={() => handleEnterZone(zone)}
+                                    className="w-full mt-4 flex items-center justify-center gap-2 bg-emerald-50 text-emerald-700 py-2 rounded-lg hover:bg-emerald-100 transition-colors font-medium"
+                                >
+                                    Manage Zone <ArrowRight size={16} />
+                                </button>
+                            </div>
+                        ))
+                    )}
+                </div>
+            )}
 
             <Modal
                 isOpen={isModalOpen}
@@ -148,6 +188,12 @@ export const Zones = () => {
                 title={editingZone ? "Edit Zone" : "Add New Zone"}
             >
                 <form onSubmit={handleSubmit} className="space-y-4">
+                    {formData.coordinates && (
+                        <div className="p-3 bg-emerald-50 text-emerald-700 text-sm rounded-lg border border-emerald-200 flex items-center gap-2">
+                            <MapPin size={16} />
+                            Location coordinates captured from map!
+                        </div>
+                    )}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Zone Name</label>
                         <input
