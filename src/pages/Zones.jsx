@@ -51,7 +51,7 @@ export const Zones = () => {
             setFormData({ name: '', area: '', location: '', crop: '' });
         } catch (error) {
             console.error("Failed to save zone", error);
-            alert("Failed to save zone. Please try again.");
+            alert(`Failed to save zone: ${error.message || error.error_description || "Unknown error"}`);
         } finally {
             setIsSubmitting(false);
         }
