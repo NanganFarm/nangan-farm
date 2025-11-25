@@ -205,13 +205,20 @@ export const FarmProvider = ({ children }) => {
             throw new Error("An active cycle already exists for this zone. Please end the current cycle before starting a new one.");
         }
 
+        // Fetch stages to get the correct ID
+        const stages = await api.getStages();
+        const plantingStage = stages.find(s => s.name === 'Planting');
+        const firstStage = stages.find(s => s.order === 1) || stages[0];
+
         const newCycle = {
             ...cycleData,
             farmId: currentFarm.id,
             zoneId: currentZone?.id || null, // Associate with zone if active
             userId: currentUser.id,
             status: 'active',
-            currentStageId: cycleData.type === 'ratoon' ? 'stage_2' : 'stage_1' // Ratoon starts at Planting (stage_2)
+            currentStageId: cycleData.type === 'ratoon'
+                ? (plantingStage?.id || firstStage?.id)
+                : firstStage?.id
         };
         const savedCycle = await api.addCycle(newCycle);
         setCycles([...cycles, savedCycle]);
