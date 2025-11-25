@@ -8,7 +8,7 @@ import { useFarm } from '../context/FarmContext';
 
 export const Settings = () => {
     const { theme, toggleTheme } = useTheme();
-    const { cycles, deleteCycle, currentFarm } = useFarm();
+    const { cycles, deleteCycle, currentFarm, deleteFarm } = useFarm();
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
