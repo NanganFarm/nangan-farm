@@ -100,7 +100,7 @@ export const api = {
             .insert([
                 {
                     name: zone.name,
-                    area: zone.area,
+                    area: parseFloat(zone.area.toString().replace(/[^0-9.]/g, '')) || 0, // Sanitize area
                     farm_id: zone.farmId,
                     user_id: zone.userId // We need to ensure this is passed
                     // location: zone.location, // Removed as column missing in DB
@@ -128,7 +128,7 @@ export const api = {
         // Map updates to snake_case
         const dbUpdates = {};
         if (updates.name) dbUpdates.name = updates.name;
-        if (updates.area) dbUpdates.area = updates.area;
+        if (updates.area) dbUpdates.area = parseFloat(updates.area.toString().replace(/[^0-9.]/g, '')) || 0; // Sanitize area
         // if (updates.location) dbUpdates.location = updates.location; // Removed as column missing in DB
         // if (updates.crop) dbUpdates.crop = updates.crop; // Removed as column missing in DB
 
