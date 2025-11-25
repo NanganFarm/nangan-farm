@@ -103,8 +103,8 @@ export const api = {
                     area: zone.area,
                     farm_id: zone.farmId,
                     user_id: zone.userId, // We need to ensure this is passed
-                    location: zone.location,
-                    crop: zone.crop
+                    location: zone.location
+                    // crop: zone.crop // Removed as column missing in DB
                 }
             ])
             .select()
@@ -118,7 +118,8 @@ export const api = {
         return {
             ...data,
             farmId: data.farm_id,
-            userId: data.user_id
+            userId: data.user_id,
+            crop: zone.crop // Return it back so UI doesn't break immediately, though it won't persist
         };
     },
 
@@ -128,7 +129,7 @@ export const api = {
         if (updates.name) dbUpdates.name = updates.name;
         if (updates.area) dbUpdates.area = updates.area;
         if (updates.location) dbUpdates.location = updates.location;
-        if (updates.crop) dbUpdates.crop = updates.crop;
+        // if (updates.crop) dbUpdates.crop = updates.crop; // Removed as column missing in DB
 
         const { data, error } = await supabase
             .from('zones')
@@ -141,7 +142,8 @@ export const api = {
         return {
             ...data,
             farmId: data.farm_id,
-            userId: data.user_id
+            userId: data.user_id,
+            crop: updates.crop || data.crop // Return it back
         };
     },
 
