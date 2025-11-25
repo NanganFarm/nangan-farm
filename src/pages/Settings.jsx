@@ -42,7 +42,7 @@ export const Settings = () => {
         if (!window.confirm("Are you sure? This will remove the category from the list but keep existing expenses.")) return;
         try {
             await api.deleteCategory(id);
-            setCategories(categories.filter(c => c.id !== id));
+            loadCategories(); // Reload to ensure IDs and list are synced
         } catch (error) {
             console.error("Failed to delete category", error);
         }
@@ -83,14 +83,13 @@ export const Settings = () => {
 
         try {
             if (editingCategory) {
-                const updated = await api.updateCategory(editingCategory.id, { name: formData.name });
-                setCategories(categories.map(c => c.id === editingCategory.id ? updated : c));
+                await api.updateCategory(editingCategory.id, { name: formData.name });
             } else {
                 if (!currentUser) return;
                 const newCategory = { name: formData.name, userId: currentUser.id };
-                const saved = await api.addCategory(newCategory);
-                setCategories([...categories, saved]);
+                await api.addCategory(newCategory);
             }
+            loadCategories(); // Reload to ensure IDs and list are synced
             setIsModalOpen(false);
             setEditingCategory(null);
             setFormData({ name: '' });
@@ -328,6 +327,57 @@ export const Settings = () => {
                             </div>
                         ))
                     )}
+                </div>
+            </div>
+
+            {/* Data Management Section */}
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                    <Trash2 size={20} className="text-red-600" /> Data Management
+                </h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                    Reset your data to default settings. <span className="font-bold text-red-600">Warning: This cannot be undone.</span>
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4">
+                    <button
+                        onClick={async () => {
+                            if (window.confirm("Are you sure you want to RESET all categories? This will delete your custom categories and restore defaults.")) {
+                                setLoading(true);
+                                try {
+                                    await api.resetCategories(currentUser.id);
+                                    await loadCategories();
+                                    alert("Categories reset successfully.");
+                                } catch (e) {
+                                    console.error(e);
+                                    alert("Failed to reset categories.");
+                                } finally {
+                                    setLoading(false);
+                                }
+                            }
+                        }}
+                        className="btn border border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-900/20"
+                    >
+                        Reset Categories
+                    </button>
+                    <button
+                        onClick={async () => {
+                            if (window.confirm("Are you sure you want to RESET all stages? This will delete all stages and restore defaults.")) {
+                                setLoading(true);
+                                try {
+                                    await api.resetStages();
+                                    alert("Stages reset successfully.");
+                                } catch (e) {
+                                    console.error(e);
+                                    alert("Failed to reset stages.");
+                                } finally {
+                                    setLoading(false);
+                                }
+                            }
+                        }}
+                        className="btn border border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-900/20"
+                    >
+                        Reset Stages
+                    </button>
                 </div>
             </div>
 

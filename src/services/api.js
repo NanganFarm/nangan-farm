@@ -1,6 +1,7 @@
 import { supabase } from '../supabaseClient';
 
 export const api = {
+    _debug: console.log("API Service Initialized"),
     // Farm Operations
     async getFarms(userId) {
         if (!userId) return [];
@@ -79,7 +80,9 @@ export const api = {
                     name: zone.name,
                     area: zone.area,
                     farm_id: zone.farmId,
-                    user_id: zone.userId // We need to ensure this is passed
+                    user_id: zone.userId, // We need to ensure this is passed
+                    location: zone.location,
+                    crop: zone.crop
                 }
             ])
             .select()
@@ -102,6 +105,8 @@ export const api = {
         const dbUpdates = {};
         if (updates.name) dbUpdates.name = updates.name;
         if (updates.area) dbUpdates.area = updates.area;
+        if (updates.location) dbUpdates.location = updates.location;
+        if (updates.crop) dbUpdates.crop = updates.crop;
 
         const { data, error } = await supabase
             .from('zones')
@@ -254,7 +259,7 @@ export const api = {
             quantity: expense.quantity,
             cost_per_unit: expense.costPerUnit,
             stage_id: expense.stageId,
-            receipt_url: expense.receiptUrl
+            receipt_url: expense.receiptUrl || expense.receiptImage // Handle both naming conventions
         };
 
         const { data, error } = await supabase
@@ -283,6 +288,8 @@ export const api = {
         if (updates.category) dbUpdates.category = updates.category;
         if (updates.description) dbUpdates.description = updates.description;
         if (updates.amount) dbUpdates.amount = updates.amount;
+        if (updates.receiptImage) dbUpdates.receipt_url = updates.receiptImage;
+        if (updates.stageId) dbUpdates.stage_id = updates.stageId;
         // ... add others as needed
 
         const { data, error } = await supabase
@@ -313,33 +320,140 @@ export const api = {
         if (error) throw error;
     },
 
+    // Stages
+    async getStages() {
+        try {
+            const { data, error } = await supabase
+                .from('stages')
+                .select('*')
+                .order('order', { ascending: true });
+
+            if (error) throw error;
+
+            if (!data || data.length === 0) {
+                console.log("Seeding default stages...");
+                const { data: inserted, error: insertError } = await supabase
+                    .from('stages')
+                    .insert(DEFAULT_STAGES)
+                    .select();
+
+                if (insertError) throw insertError;
+                return inserted;
+            }
+            return data;
+        } catch (error) {
+            console.warn("Using default stages due to error:", error);
+            return DEFAULT_STAGES;
+        }
+    },
+
     // Categories
     async getCategories() {
-        // For now, return static or fetch from DB if we implemented that table
-        // Let's fetch from DB since we added the table
-        const { data, error } = await supabase
-            .from('categories')
-            .select('*');
+        try {
+            const { data, error } = await supabase
+                .from('categories')
+                .select('*');
 
-        if (error || !data || data.length === 0) {
-            // Fallback to static if empty
-            return [
-                { "id": "cat_1", "name": "Labor", "type": "variable" },
-                { "id": "cat_2", "name": "Fertilizer", "type": "variable" },
-                { "id": "cat_3", "name": "Equipment", "type": "fixed" },
-                { "id": "cat_4", "name": "Seeds", "type": "variable" },
-                { "id": "cat_5", "name": "Fuel", "type": "variable" },
-                { "id": "cat_6", "name": "Transport", "type": "variable" },
-                { "id": "cat_7", "name": "Others", "type": "fixed" }
-            ];
+            if (error) throw error;
+
+            if (!data || data.length === 0) {
+                console.log("Seeding default categories...");
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    await this._materializeDefaults(user.id);
+                    // Re-fetch to get the generated IDs
+                    const { data: refetched } = await supabase
+                        .from('categories')
+                        .select('*');
+                    return refetched;
+                }
+                return DEFAULT_CATEGORIES;
+            }
+            return data;
+        } catch (error) {
+            console.warn("Using default categories due to error:", error);
+            return DEFAULT_CATEGORIES;
         }
-        return data;
+    },
+
+    async _materializeDefaults(userId, excludeId = null) {
+        // 1. Fetch existing categories for this user to avoid duplicates
+        const { data: existing, error: fetchError } = await supabase
+            .from('categories')
+            .select('name')
+            .eq('user_id', userId);
+
+        if (fetchError) {
+            console.error("Error checking existing categories:", fetchError);
+            throw fetchError;
+        }
+
+        const existingNames = new Set(existing?.map(c => c.name) || []);
+
+        // 2. Filter defaults: Exclude the one being edited/deleted AND those that already exist
+        const toInsert = DEFAULT_CATEGORIES
+            .filter(c => c.id !== excludeId && !existingNames.has(c.name))
+            .map(c => ({
+                name: c.name,
+                type: c.type, // Include type
+                user_id: userId
+            }));
+
+        if (toInsert.length === 0) return;
+
+        // 3. Insert missing defaults
+        const { error } = await supabase
+            .from('categories')
+            .insert(toInsert);
+
+        if (error) throw error;
     },
 
     async addCategory(category) {
+        // 1. Check if we are in "Default Mode" (empty DB)
+        const { count } = await supabase
+            .from('categories')
+            .select('*', { count: 'exact', head: true });
+
+        if (count === 0) {
+            // Materialize defaults first so we don't lose them
+            await this._materializeDefaults(category.userId);
+        }
+
         const { data, error } = await supabase
             .from('categories')
-            .insert([{ name: category.name, user_id: category.userId }]) // Assuming we pass userId
+            .insert([{ name: category.name, user_id: category.userId }])
+            .select()
+            .single();
+        if (error) throw error;
+        return data;
+    },
+
+    async updateCategory(id, updates) {
+        // Check if it's a default category (id starts with "cat_")
+        if (typeof id === 'string' && id.startsWith('cat_')) {
+            // We can't update a virtual category. We must materialize defaults first.
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error("User not logged in");
+
+            // Materialize all defaults EXCEPT the one we are "updating" (which we will insert as new with new name)
+            await this._materializeDefaults(user.id, id);
+
+            // Now insert the updated one as a new record
+            const { data, error } = await supabase
+                .from('categories')
+                .insert([{ name: updates.name, user_id: user.id }])
+                .select()
+                .single();
+
+            if (error) throw error;
+            return data;
+        }
+
+        const { data, error } = await supabase
+            .from('categories')
+            .update({ name: updates.name })
+            .eq('id', id)
             .select()
             .single();
         if (error) throw error;
@@ -347,10 +461,80 @@ export const api = {
     },
 
     async deleteCategory(id) {
+        // Check if it's a default category
+        if (typeof id === 'string' && id.startsWith('cat_')) {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error("User not logged in");
+
+            // Materialize all defaults EXCEPT this one
+            await this._materializeDefaults(user.id, id);
+            return; // Done. The "deleted" one is simply not inserted.
+        }
+
         const { error } = await supabase
             .from('categories')
             .delete()
             .eq('id', id);
         if (error) throw error;
+    },
+
+    async resetCategories(userId) {
+        if (!userId) throw new Error("User ID required");
+
+        // 1. Delete all categories for this user
+        const { error: deleteError } = await supabase
+            .from('categories')
+            .delete()
+            .eq('user_id', userId);
+
+        if (deleteError) throw deleteError;
+
+        // 2. Restore defaults
+        await this._materializeDefaults(userId);
+    },
+
+    async resetStages() {
+        // Warning: This affects all users if stages are global. 
+        // Assuming single-tenant or isolated environment for now based on user request.
+        const { error: deleteError } = await supabase
+            .from('stages')
+            .delete()
+            .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all (neq is a hack if no ID known, or just use empty filter if allowed)
+        // Better: .gt('id', '0') or something if IDs are UUIDs. 
+        // Actually, if we just want to reset, we can try deleting all.
+
+        // Supabase might block 'delete all' without filter. 
+        // Let's fetch IDs first then delete.
+        const { data: stages } = await supabase.from('stages').select('id');
+        if (stages && stages.length > 0) {
+            const ids = stages.map(s => s.id);
+            const { error } = await supabase.from('stages').delete().in('id', ids);
+            if (error) throw error;
+        }
+
+        // Insert defaults
+        const { error: insertError } = await supabase
+            .from('stages')
+            .insert(DEFAULT_STAGES);
+
+        if (insertError) throw insertError;
     }
 };
+
+const DEFAULT_CATEGORIES = [
+    { "id": "cat_1", "name": "Labor", "type": "variable" },
+    { "id": "cat_2", "name": "Fertilizer", "type": "variable" },
+    { "id": "cat_3", "name": "Equipment", "type": "fixed" },
+    { "id": "cat_4", "name": "Seeds", "type": "variable" },
+    { "id": "cat_5", "name": "Fuel", "type": "variable" },
+    { "id": "cat_6", "name": "Transport", "type": "variable" },
+    { "id": "cat_7", "name": "Others", "type": "fixed" }
+];
+
+const DEFAULT_STAGES = [
+    { "name": "Land Preparation", "order": 1 },
+    { "name": "Planting", "order": 2 },
+    { "name": "Growing", "order": 3 },
+    { "name": "Harvest", "order": 4 },
+    { "name": "Milling", "order": 5 }
+];

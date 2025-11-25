@@ -160,13 +160,36 @@ export const Dashboard = () => {
     }, [currentFarm, currentCycle, currentZone]);
 
     const loadData = async () => {
+        console.log("Dashboard loading data. Farm:", currentFarm);
         setLoading(true);
         try {
-            const [stageData, zoneData, cycleData] = await Promise.all([
-                api.getStages(),
-                api.getZones(currentFarm.id),
-                api.getCycles(currentFarm.id)
-            ]);
+            // Load Stages
+            let stageData = [];
+            try {
+                stageData = await api.getStages();
+                console.log("Loaded stages:", stageData.length);
+            } catch (e) {
+                console.error("Failed to load stages:", e);
+            }
+
+            // Load Zones
+            let zoneData = [];
+            try {
+                zoneData = await api.getZones(currentFarm.id);
+                console.log("Loaded zones:", zoneData.length);
+            } catch (e) {
+                console.error("Failed to load zones:", e);
+            }
+
+            // Load Cycles
+            let cycleData = [];
+            try {
+                cycleData = await api.getCycles(currentFarm.id);
+                console.log("Loaded cycles:", cycleData.length);
+            } catch (e) {
+                console.error("Failed to load cycles:", e);
+            }
+
             // Ensure stages are sorted by order
             const sortedStages = stageData.sort((a, b) => a.order - b.order);
             setStages(sortedStages);
@@ -174,9 +197,15 @@ export const Dashboard = () => {
             setCycles(cycleData);
 
             // Fetch expenses based on view
-            let expenseData = currentCycle
-                ? await api.getExpenses(currentFarm.id, currentCycle.id)
-                : await api.getExpenses(currentFarm.id);
+            let expenseData = [];
+            try {
+                expenseData = currentCycle
+                    ? await api.getExpenses(currentFarm.id, currentCycle.id)
+                    : await api.getExpenses(currentFarm.id);
+                console.log("Loaded expenses:", expenseData.length);
+            } catch (e) {
+                console.error("Failed to load expenses:", e);
+            }
 
             // If not in a specific cycle view (Farm View or Zone View)
             if (!currentCycle) {
@@ -195,7 +224,7 @@ export const Dashboard = () => {
 
             setExpenses(expenseData);
         } catch (error) {
-            console.error("Failed to load dashboard data", error);
+            console.error("Failed to load dashboard data (General Error)", error);
         } finally {
             setLoading(false);
         }

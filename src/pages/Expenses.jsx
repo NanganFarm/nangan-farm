@@ -37,7 +37,7 @@ export const Expenses = () => {
         date: new Date().toISOString().split('T')[0],
         amount: '',
         category: '',
-        stage: '',
+        stageId: '',
         description: ''
     });
 
@@ -59,7 +59,33 @@ export const Expenses = () => {
     }, [currentZone]);
 
     const loadData = async () => {
+        console.log("Expenses: loadData started");
         setLoading(true);
+
+        // 1. Load Metadata (Stages, Categories) - Robust
+        try {
+            const [stageData, catData] = await Promise.all([
+                api.getStages(),
+                api.getCategories()
+            ]);
+            setStages(stageData);
+            setCategories(catData);
+            console.log("Expenses: Loaded metadata", { stages: stageData.length, categories: catData.length });
+
+            // Set defaults if not already set
+            if (stageData.length > 0 && catData.length > 0) {
+                const currentStage = currentCycle ? stageData.find(s => s.id === currentCycle.currentStageId) : null;
+                setFormData(prev => ({
+                    ...prev,
+                    stageId: prev.stageId || (currentStage ? currentStage.id : stageData[0].id),
+                    category: prev.category || catData[0].name
+                }));
+            }
+        } catch (error) {
+            console.error("Failed to load metadata", error);
+        }
+
+        // 2. Load Farm Data (Expenses, Zones, Cycles)
         try {
             // If we have a cycle, fetch for that cycle.
             // If no cycle (Farm View), fetch all for the farm.
@@ -67,10 +93,8 @@ export const Expenses = () => {
                 ? api.getExpenses(currentFarm.id, currentCycle.id)
                 : api.getExpenses(currentFarm.id);
 
-            const [expData, stageData, catData, zoneData, cycleData] = await Promise.all([
+            const [expData, zoneData, cycleData] = await Promise.all([
                 expensePromise,
-                api.getStages(),
-                api.getCategories(),
                 api.getZones(currentFarm.id),
                 api.getCycles(currentFarm.id)
             ]);
@@ -83,22 +107,12 @@ export const Expenses = () => {
             });
 
             setExpenses(sortedExpenses);
-            setStages(stageData);
-            setCategories(catData);
             setZones(zoneData);
             setCycles(cycleData);
 
-            // Set defaults
-            if (stageData.length > 0 && catData.length > 0) {
-                const currentStage = currentCycle ? stageData.find(s => s.id === currentCycle.currentStageId) : null;
-                setFormData(prev => ({
-                    ...prev,
-                    stage: currentStage ? currentStage.name : stageData[0].name,
-                    category: catData[0].name
-                }));
-            }
         } catch (error) {
-            console.error("Failed to load data", error);
+            console.error("Failed to load farm data", error);
+            // We don't block the UI if expenses fail, we just show empty list
         } finally {
             setLoading(false);
         }
@@ -160,7 +174,7 @@ export const Expenses = () => {
             date: expense.date,
             amount: expense.amount,
             category: expense.category,
-            stage: expense.stage,
+            stageId: expense.stageId,
             description: expense.description || ''
         });
         setReceiptImage(expense.receiptImage || null);
@@ -193,6 +207,7 @@ export const Expenses = () => {
                     cycleId: currentCycle.id,
                     zoneId: currentZone?.id || null,
                     userId: currentUser.id,
+                    stageId: formData.stageId,
                     receiptImage: receiptImage
                 };
                 const savedExpense = await api.addExpense(newExpense);
@@ -599,12 +614,12 @@ export const Expenses = () => {
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Stage</label>
                         <select
-                            value={formData.stage}
-                            onChange={e => setFormData({ ...formData, stage: e.target.value })}
+                            value={formData.stageId}
+                            onChange={e => setFormData({ ...formData, stageId: e.target.value })}
                             className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none bg-white dark:bg-gray-700 dark:text-white"
                         >
                             {stages.map(s => (
-                                <option key={s.id} value={s.name}>{s.name}</option>
+                                <option key={s.id} value={s.id}>{s.name}</option>
                             ))}
                         </select>
                     </div>
