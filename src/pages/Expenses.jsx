@@ -5,6 +5,7 @@ import { useFarm } from '../context/FarmContext';
 import { useAuth } from '../context/AuthContext';
 import { Plus, Search, Filter, Trash2, Pencil, Image as ImageIcon, X, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { Modal } from '../components/Modal';
+import { CreatableSelect } from '../components/CreatableSelect';
 
 export const Expenses = () => {
     const { currentFarm, currentCycle, currentZone } = useFarm();
@@ -62,23 +63,26 @@ export const Expenses = () => {
         console.log("Expenses: loadData started");
         setLoading(true);
 
+        let fetchedStages = [];
+        let fetchedCategories = [];
+
         // 1. Load Metadata (Stages, Categories) - Robust
         try {
-            const [stageData, catData] = await Promise.all([
+            [fetchedStages, fetchedCategories] = await Promise.all([
                 api.getStages(),
                 api.getCategories()
             ]);
-            setStages(stageData);
-            setCategories(catData);
-            console.log("Expenses: Loaded metadata", { stages: stageData.length, categories: catData.length });
+            setStages(fetchedStages);
+            setCategories(fetchedCategories);
+            console.log("Expenses: Loaded metadata", { stages: fetchedStages.length, categories: fetchedCategories.length });
 
             // Set defaults if not already set
-            if (stageData.length > 0 && catData.length > 0) {
-                const currentStage = currentCycle ? stageData.find(s => s.id === currentCycle.currentStageId) : null;
+            if (fetchedStages.length > 0 && fetchedCategories.length > 0) {
+                const currentStage = currentCycle ? fetchedStages.find(s => s.id === currentCycle.currentStageId) : null;
                 setFormData(prev => ({
                     ...prev,
-                    stageId: prev.stageId || (currentStage ? currentStage.id : stageData[0].id),
-                    category: prev.category || catData[0].name
+                    stageId: prev.stageId || (currentStage ? currentStage.id : fetchedStages[0].id),
+                    category: prev.category || fetchedCategories[0].name
                 }));
             }
         } catch (error) {
@@ -99,8 +103,15 @@ export const Expenses = () => {
                 api.getCycles(currentFarm.id)
             ]);
 
+            // Enrich expenses with stage names
+            const enrichedExpenses = expData.map(e => {
+                if (!e.stageId) return { ...e, stage: 'No Stage' };
+                const stage = fetchedStages.find(s => s.id === e.stageId);
+                return { ...e, stage: stage ? stage.name : 'Unknown Stage' };
+            });
+
             // Manual sort to guarantee order: Date desc, then CreatedAt desc
-            const sortedExpenses = expData.sort((a, b) => {
+            const sortedExpenses = enrichedExpenses.sort((a, b) => {
                 const dateCompare = new Date(b.date) - new Date(a.date);
                 if (dateCompare !== 0) return dateCompare;
                 return new Date(b.createdAt) - new Date(a.createdAt);
@@ -168,18 +179,38 @@ export const Expenses = () => {
         }
     };
 
+    const handleCreateCategory = async (newCategoryName) => {
+        if (!currentUser) {
+            alert("You must be logged in to create a category.");
+            return;
+        }
+        try {
+            const newCategory = await api.addCategory({
+                name: newCategoryName,
+                userId: currentUser.id
+            });
+            setCategories([...categories, newCategory]);
+            setFormData(prev => ({ ...prev, category: newCategory.name }));
+        } catch (error) {
+            console.error("Failed to create category:", error);
+            alert("Failed to create category. It might already exist.");
+        }
+    };
+
     const handleEdit = (expense) => {
         setEditingExpense(expense);
         setFormData({
             date: expense.date,
             amount: expense.amount,
             category: expense.category,
-            stageId: expense.stageId,
+            stageId: expense.stageId || '', // Ensure not null
             description: expense.description || ''
         });
         setReceiptImage(expense.receiptImage || null);
         setIsModalOpen(true);
     };
+
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -336,7 +367,16 @@ export const Expenses = () => {
                 </div>
                 {currentCycle && (
                     <button
-                        onClick={() => setIsModalOpen(true)}
+                        onClick={() => {
+                            setFormData({
+                                date: new Date().toISOString().split('T')[0],
+                                amount: '',
+                                category: formData.category || (categories.length > 0 ? categories[0].name : ''),
+                                stageId: currentCycle.currentStageId || '',
+                                description: ''
+                            });
+                            setIsModalOpen(true);
+                        }}
                         className="btn btn-primary shadow-lg shadow-emerald-900/20"
                     >
                         <Plus size={18} />
@@ -586,15 +626,13 @@ export const Expenses = () => {
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
-                        <select
+                        <CreatableSelect
+                            options={categories.map(c => ({ label: c.name, value: c.name }))}
                             value={formData.category}
-                            onChange={e => setFormData({ ...formData, category: e.target.value })}
-                            className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none bg-white dark:bg-gray-700 dark:text-white"
-                        >
-                            {categories.map(c => (
-                                <option key={c.id} value={c.name}>{c.name}</option>
-                            ))}
-                        </select>
+                            onChange={(value) => setFormData({ ...formData, category: value })}
+                            onCreate={handleCreateCategory}
+                            placeholder="Select or create category..."
+                        />
                     </div>
 
                     <div>
@@ -618,6 +656,7 @@ export const Expenses = () => {
                             onChange={e => setFormData({ ...formData, stageId: e.target.value })}
                             className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none bg-white dark:bg-gray-700 dark:text-white"
                         >
+                            <option value="">Select Stage (Optional)</option>
                             {stages.map(s => (
                                 <option key={s.id} value={s.id}>{s.name}</option>
                             ))}

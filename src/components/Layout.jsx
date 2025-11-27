@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Receipt, Settings, Sprout, Plus, ChevronDown, BarChart3, Menu, X, MapPin, ArrowLeft } from 'lucide-react';
+import { LayoutDashboard, Receipt, Settings, Sprout, Plus, ChevronDown, BarChart3, Menu, X, MapPin, ArrowLeft, Coins, History } from 'lucide-react';
 import clsx from 'clsx';
 import { useFarm } from '../context/FarmContext';
 import { useAuth } from '../context/AuthContext';
@@ -340,9 +340,9 @@ export const Layout = ({ children }) => {
 
                 <nav className="flex-1 p-4 space-y-1">
                     <NavItem to="/" icon={LayoutDashboard} label="Dashboard" />
-                    <NavItem to="/expenses" icon={Receipt} label="Expenses" />
+                    <NavItem to="/expenses" icon={Coins} label="Expenses" />
                     <NavItem to="/charts" icon={BarChart3} label="Charts" />
-                    <NavItem to="/history" icon={Receipt} label="History" />
+                    <NavItem to="/history" icon={History} label="History" />
                     <NavItem to="/gallery" icon={Receipt} label="Gallery" />
                     <NavItem to="/settings" icon={Settings} label="Settings" />
                 </nav>

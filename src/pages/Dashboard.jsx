@@ -316,13 +316,23 @@ export const Dashboard = () => {
                             : 'Aggregated view of all zones and expenses.'}
                     </p>
                 </div>
-                {currentCycle && (
-                    <button
-                        onClick={() => setIsEndCycleModalOpen(true)}
-                        className="btn bg-red-600 hover:bg-red-700 text-white border-red-600"
-                    >
-                        End Cycle
-                    </button>
+                {currentCycle && currentCycle.status !== 'completed' && (
+                    (() => {
+                        const lastStage = stages[stages.length - 1];
+                        const isLastStage = lastStage && currentCycle.currentStageId === lastStage.id;
+
+                        if (isLastStage) {
+                            return (
+                                <button
+                                    onClick={() => setIsEndCycleModalOpen(true)}
+                                    className="btn bg-red-600 hover:bg-red-700 text-white border-red-600"
+                                >
+                                    End Cycle
+                                </button>
+                            );
+                        }
+                        return null;
+                    })()
                 )}
             </div>
 
@@ -460,17 +470,12 @@ const EndCycleModal = ({ isOpen, onClose, cycle }) => {
         receiptImages: [] // Placeholder for now
     });
 
+    const [receiptFiles, setReceiptFiles] = useState([]);
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => {
             const newData = { ...prev, [name]: value };
-
-            // Auto-calculate amounts if possible
-            if (name === 'lkgPerTon' || name === 'sugarPrice' || name === 'plantersSharePercent') {
-                // This is a simplified calculation placeholder. 
-                // Actual formula depends on tonnage which isn't in cycle data yet, 
-                // so we'll just let user input amounts for now or implement basic logic later.
-            }
             return newData;
         });
     };
@@ -478,6 +483,10 @@ const EndCycleModal = ({ isOpen, onClose, cycle }) => {
     const handleFileChange = (e) => {
         const files = Array.from(e.target.files);
 
+        // Store File objects for upload
+        setReceiptFiles(prev => [...prev, ...files]);
+
+        // Generate previews
         Promise.all(files.map(file => {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -495,12 +504,16 @@ const EndCycleModal = ({ isOpen, onClose, cycle }) => {
             ...prev,
             receiptImages: prev.receiptImages.filter((_, i) => i !== index)
         }));
+        setReceiptFiles(prev => prev.filter((_, i) => i !== index));
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await endCycle(cycle.id, formData);
+            await endCycle(cycle.id, {
+                ...formData,
+                receiptFiles // Pass the raw files
+            });
             onClose();
         } catch (error) {
             alert("Failed to end cycle: " + error.message);

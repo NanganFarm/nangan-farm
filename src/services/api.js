@@ -165,7 +165,7 @@ export const api = {
     async getCycles(farmId) {
         const { data, error } = await supabase
             .from('cycles')
-            .select('*')
+            .select('*, milling_records(*), cycle_stage_history(*, stages(name))')
             .eq('farm_id', farmId);
 
         if (error) throw error;
@@ -176,8 +176,34 @@ export const api = {
             userId: c.user_id,
             startDate: c.start_date,
             endDate: c.end_date,
-            currentStageId: c.current_stage_id
+            currentStageId: c.current_stage_id,
+            milling: c.milling_records && c.milling_records.length > 0 ? {
+                lkgPerTon: c.milling_records[0].lkg_per_ton,
+                sugarPrice: c.milling_records[0].sugar_price,
+                plantersSharePercent: c.milling_records[0].planters_share_percent,
+                netAmount: c.milling_records[0].net_amount,
+                grossAmount: c.milling_records[0].gross_amount,
+                millingDate: c.milling_records[0].milling_date,
+                receiptUrls: c.milling_records[0].receipt_urls
+            } : null,
+            stageHistory: c.cycle_stage_history ? c.cycle_stage_history.map(h => ({
+                id: h.id,
+                stageId: h.stage_id,
+                stageName: h.stages?.name || 'Unknown Stage',
+                enteredAt: h.entered_at
+            })).sort((a, b) => new Date(a.enteredAt) - new Date(b.enteredAt)) : []
         }));
+    },
+
+    async logStageTransition(cycleId, stageId) {
+        const { error } = await supabase
+            .from('cycle_stage_history')
+            .insert([{
+                cycle_id: cycleId,
+                stage_id: stageId
+            }]);
+
+        if (error) console.error("Failed to log stage transition:", error);
     },
 
     async addCycle(cycle) {
@@ -223,9 +249,14 @@ export const api = {
             .update(dbUpdates)
             .eq('id', id)
             .select()
-            .single();
+            .maybeSingle();
 
         if (error) throw error;
+        if (!data) {
+            console.warn(`Update cycle failed: Cycle ${id} not found or permission denied.`);
+            throw new Error(`Cycle not found or permission denied (ID: ${id})`);
+        }
+
         return {
             ...data,
             farmId: data.farm_id,
@@ -558,6 +589,45 @@ export const api = {
             .insert(DEFAULT_STAGES);
 
         if (insertError) throw insertError;
+    },
+
+    // Milling Records
+    async createMillingRecord(record) {
+        const dbRecord = {
+            cycle_id: record.cycleId,
+            lkg_per_ton: record.lkgPerTon,
+            sugar_price: record.sugarPrice,
+            planters_share_percent: record.plantersSharePercent,
+            net_amount: record.netAmount,
+            gross_amount: record.grossAmount,
+            milling_date: record.millingDate,
+            receipt_urls: record.receiptUrls
+        };
+
+        const { data, error } = await supabase
+            .from('milling_records')
+            .insert([dbRecord])
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    },
+
+    // Storage
+    async uploadFile(file, bucket, path) {
+        const { data, error } = await supabase.storage
+            .from(bucket)
+            .upload(path, file);
+
+        if (error) throw error;
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+            .from(bucket)
+            .getPublicUrl(path);
+
+        return publicUrl;
     }
 };
 

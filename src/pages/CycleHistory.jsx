@@ -136,7 +136,7 @@ export const CycleHistory = () => {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-gray-100 dark:border-gray-700 pt-4">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 border-t border-gray-100 dark:border-gray-700 pt-4">
                                 <div>
                                     <p className="text-xs text-gray-500 mb-1">Total Expenses</p>
                                     <p className="text-xl font-bold text-red-600">₱{cycle.totalExpenses.toLocaleString()}</p>
@@ -149,10 +149,20 @@ export const CycleHistory = () => {
                                             <p className="text-xl font-bold text-emerald-600">₱{Number(cycle.milling.netAmount).toLocaleString()}</p>
                                         </div>
                                         <div>
+                                            <p className="text-xs text-gray-500 mb-1">Gross Income</p>
+                                            <p className="text-lg font-semibold text-gray-700 dark:text-gray-300">₱{Number(cycle.milling.grossAmount).toLocaleString()}</p>
+                                        </div>
+                                        <div>
                                             <p className="text-xs text-gray-500 mb-1">Production</p>
-                                            <div className="flex items-center gap-2">
-                                                <span className="font-medium text-gray-900 dark:text-white">{cycle.milling.lkgPerTon || 0} LKG/Ton</span>
-                                            </div>
+                                            <p className="font-medium text-gray-900 dark:text-white">{cycle.milling.lkgPerTon || 0} LKG/Ton</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-gray-500 mb-1">Sugar Price</p>
+                                            <p className="text-sm font-medium text-gray-900 dark:text-white">₱{Number(cycle.milling.sugarPrice).toLocaleString()}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-gray-500 mb-1">Planter's Share</p>
+                                            <p className="text-sm font-medium text-gray-900 dark:text-white">{cycle.milling.plantersSharePercent}%</p>
                                         </div>
                                     </>
                                 ) : (
@@ -161,6 +171,34 @@ export const CycleHistory = () => {
                                     </div>
                                 )}
                             </div>
+
+                            {/* Timeline Section */}
+                            {cycle.stageHistory && cycle.stageHistory.length > 0 && (
+                                <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700">
+                                    <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                                        <Calendar size={14} className="text-emerald-500" /> Stage Timeline
+                                    </h4>
+                                    <div className="relative pl-4 border-l-2 border-gray-200 dark:border-gray-700 space-y-6 ml-2">
+                                        {cycle.stageHistory.map((history, index) => (
+                                            <div key={history.id} className="relative">
+                                                <div className="absolute -left-[21px] top-1.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white dark:border-gray-800 ring-1 ring-emerald-100 dark:ring-emerald-900"></div>
+                                                <div>
+                                                    <p className="text-sm font-medium text-gray-900 dark:text-white">{history.stageName}</p>
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                        {new Date(history.enteredAt).toLocaleDateString(undefined, {
+                                                            year: 'numeric',
+                                                            month: 'long',
+                                                            day: 'numeric',
+                                                            hour: '2-digit',
+                                                            minute: '2-digit'
+                                                        })}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     ))
                 )}

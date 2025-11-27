@@ -237,6 +237,10 @@ export const FarmProvider = ({ children }) => {
             const updatedCycle = { ...currentCycle, currentStageId: stageId };
             console.log("Updating cycle via API...", currentCycle.id, { currentStageId: stageId });
             await api.updateCycle(currentCycle.id, { currentStageId: stageId });
+
+            // Log stage transition
+            await api.logStageTransition(currentCycle.id, stageId);
+
             console.log("API update success");
 
             setCycles(cycles.map(c => c.id === currentCycle.id ? updatedCycle : c));
@@ -248,13 +252,42 @@ export const FarmProvider = ({ children }) => {
 
     const endCycle = async (cycleId, millingData) => {
         try {
+            // 1. Upload Receipts
+            const receiptUrls = [];
+            if (millingData.receiptFiles && millingData.receiptFiles.length > 0) {
+                for (const file of millingData.receiptFiles) {
+                    const path = `${cycleId}/${Date.now()}_${file.name}`;
+                    const url = await api.uploadFile(file, 'receipts', path);
+                    receiptUrls.push(url);
+                }
+            }
+
+            // 2. Create Milling Record
+            const millingRecord = {
+                cycleId,
+                lkgPerTon: millingData.lkgPerTon,
+                sugarPrice: millingData.sugarPrice,
+                plantersSharePercent: millingData.plantersSharePercent,
+                netAmount: millingData.netAmount,
+                grossAmount: millingData.grossAmount || 0, // Calculate if needed, or pass 0
+                millingDate: new Date().toISOString(),
+                receiptUrls
+            };
+            await api.createMillingRecord(millingRecord);
+
+            // 3. Update Cycle Status
             const updatedCycle = {
                 ...currentCycle,
                 status: 'completed',
                 endDate: new Date().toISOString().split('T')[0],
-                milling: millingData
+                // We don't store milling data directly in cycle anymore, but maybe a flag or reference?
+                // For now, let's keep it clean.
             };
-            await api.updateCycle(cycleId, updatedCycle);
+            await api.updateCycle(cycleId, {
+                status: 'completed',
+                endDate: updatedCycle.endDate
+            });
+
             setCycles(cycles.map(c => c.id === cycleId ? updatedCycle : c));
             setCurrentCycle(null); // Clear current cycle as it is now ended
         } catch (error) {
