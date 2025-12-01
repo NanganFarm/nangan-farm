@@ -26,6 +26,18 @@ export const api = {
         return data;
     },
 
+    async updateFarm(id, updates) {
+        const { data, error } = await supabase
+            .from('farms')
+            .update(updates)
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    },
+
     async deleteFarm(id) {
         // 1. Delete Expenses
         const { error: expenseError } = await supabase
@@ -628,6 +640,88 @@ export const api = {
             .getPublicUrl(path);
 
         return publicUrl;
+    },
+
+    // Task Operations
+    async getTasks(farmId) {
+        const { data, error } = await supabase
+            .from('tasks')
+            .select('*, zones(name)')
+            .eq('farm_id', farmId)
+            .order('due_date', { ascending: true });
+
+        if (error) throw error;
+        return data.map(t => ({
+            ...t,
+            farmId: t.farm_id,
+            zoneId: t.zone_id,
+            userId: t.user_id,
+            dueDate: t.due_date,
+            zoneName: t.zones?.name
+        }));
+    },
+
+    async addTask(task) {
+        const dbTask = {
+            title: task.title,
+            description: task.description,
+            due_date: task.dueDate,
+            priority: task.priority,
+            status: task.status || 'pending',
+            farm_id: task.farmId,
+            zone_id: task.zoneId,
+            user_id: task.userId
+        };
+
+        const { data, error } = await supabase
+            .from('tasks')
+            .insert([dbTask])
+            .select()
+            .single();
+
+        if (error) throw error;
+        return {
+            ...data,
+            farmId: data.farm_id,
+            zoneId: data.zone_id,
+            userId: data.user_id,
+            dueDate: data.due_date
+        };
+    },
+
+    async updateTask(id, updates) {
+        const dbUpdates = {};
+        if (updates.title) dbUpdates.title = updates.title;
+        if (updates.description) dbUpdates.description = updates.description;
+        if (updates.dueDate) dbUpdates.due_date = updates.dueDate;
+        if (updates.priority) dbUpdates.priority = updates.priority;
+        if (updates.status) dbUpdates.status = updates.status;
+        if (updates.zoneId) dbUpdates.zone_id = updates.zoneId;
+
+        const { data, error } = await supabase
+            .from('tasks')
+            .update(dbUpdates)
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return {
+            ...data,
+            farmId: data.farm_id,
+            zoneId: data.zone_id,
+            userId: data.user_id,
+            dueDate: data.due_date
+        };
+    },
+
+    async deleteTask(id) {
+        const { error } = await supabase
+            .from('tasks')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
     }
 };
 

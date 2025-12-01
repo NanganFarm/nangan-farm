@@ -135,6 +135,20 @@ export const FarmProvider = ({ children }) => {
         return savedFarm;
     };
 
+    const updateFarm = async (farmId, updates) => {
+        try {
+            const updatedFarm = await api.updateFarm(farmId, updates);
+            setFarms(farms.map(f => f.id === farmId ? updatedFarm : f));
+            if (currentFarm?.id === farmId) {
+                setCurrentFarm(updatedFarm);
+            }
+            return updatedFarm;
+        } catch (error) {
+            console.error("Failed to update farm:", error);
+            throw error;
+        }
+    };
+
     const deleteFarm = async (farmId) => {
         try {
             await api.deleteFarm(farmId);
@@ -316,6 +330,7 @@ export const FarmProvider = ({ children }) => {
             currentFarm,
             switchFarm,
             addFarm,
+            updateFarm,
             deleteFarm,
             cycles: filteredCycles, // Expose filtered cycles
             currentCycle,

@@ -8,6 +8,8 @@ import { Charts } from './pages/Charts';
 import { Settings } from './pages/Settings';
 import { CycleHistory } from './pages/CycleHistory';
 import { Gallery } from './pages/Gallery';
+import { Analytics } from './pages/Analytics';
+import { Tasks } from './pages/Tasks';
 
 import { Zones } from './pages/Zones';
 import { FarmProvider } from './context/FarmContext';
@@ -79,6 +81,8 @@ function App() {
                         <Route path="/history" element={<CycleHistory />} />
                         <Route path="/gallery" element={<Gallery />} />
                         <Route path="/zones" element={<Zones />} />
+                        <Route path="/tasks" element={<Tasks />} />
+                        <Route path="/analytics" element={<Analytics />} />
                         <Route path="/settings" element={<Settings />} />
                         <Route path="*" element={<div className="p-8 text-center text-red-500">404 - Page Not Found</div>} />
                       </Routes>

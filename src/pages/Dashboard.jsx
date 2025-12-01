@@ -5,6 +5,7 @@ import { DollarSign, CheckCircle2, Circle, ChevronLeft, ChevronRight } from 'luc
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday, addMonths, subMonths, parseISO } from 'date-fns';
 import clsx from 'clsx';
 import { Modal } from '../components/Modal';
+import { WeatherWidget } from '../components/WeatherWidget';
 
 const StatCard = ({ title, value, icon: Icon, color }) => (
     <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-start justify-between transition-colors">
@@ -336,57 +337,88 @@ export const Dashboard = () => {
                 )}
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <StatCard
-                    title="Total Expenses"
-                    value={`₱${totalExpenses.toLocaleString()}`}
-                    icon={DollarSign}
-                    color="bg-emerald-500"
-                />
-                <StatCard
-                    title={currentCycle ? "Current Stage" : "Active Zones"}
-                    value={currentCycle
-                        ? (stages.find(s => s.id === currentCycle.currentStageId)?.name || 'Unknown')
-                        : zones.length
-                    }
-                    icon={CheckCircle2}
-                    color="bg-blue-500"
-                />
-                <StatCard
-                    title={currentCycle ? "Days Active" : "Total Cycles"}
-                    value={currentCycle
-                        ? Math.ceil((new Date() - new Date(currentCycle.startDate)) / (1000 * 60 * 60 * 24))
-                        : cycles.length
-                    }
-                    icon={Circle}
-                    color="bg-purple-500"
-                />
-            </div>
+            {/* Top Section: Stats & Weather */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Left Column: Stats & Progress */}
+                <div className="lg:col-span-2 space-y-6">
+                    {/* Stats Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <StatCard
+                            title="Total Expenses"
+                            value={`₱${totalExpenses.toLocaleString()}`}
+                            icon={DollarSign}
+                            color="bg-emerald-500"
+                        />
+                        <StatCard
+                            title={currentCycle ? "Current Stage" : "Active Zones"}
+                            value={currentCycle
+                                ? (stages.find(s => s.id === currentCycle.currentStageId)?.name || 'Unknown')
+                                : zones.length
+                            }
+                            icon={CheckCircle2}
+                            color="bg-blue-500"
+                        />
+                        <StatCard
+                            title={currentCycle ? "Days Active" : "Total Cycles"}
+                            value={currentCycle
+                                ? Math.ceil((new Date() - new Date(currentCycle.startDate)) / (1000 * 60 * 60 * 24))
+                                : cycles.length
+                            }
+                            icon={Circle}
+                            color="bg-purple-500"
+                        />
+                    </div>
 
-            {/* Zone Breakdown (Only in Farm View) */}
-            {!currentCycle && zones.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {zoneTotals.map(zone => (
-                        <div key={zone.id} className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-                            <h4 className="font-bold text-gray-900 dark:text-white">{zone.name}</h4>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">{zone.crop} • {zone.area}</p>
-                            <div className="mt-2 text-xl font-semibold text-emerald-600 dark:text-emerald-400">
-                                ₱{zone.total.toLocaleString()}
-                            </div>
+                    {/* Zone Breakdown (Only in Farm View) */}
+                    {!currentCycle && zones.length > 0 && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {zoneTotals.map(zone => (
+                                <div key={zone.id} className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                                    <h4 className="font-bold text-gray-900 dark:text-white">{zone.name}</h4>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">{zone.crop} • {zone.area}</p>
+                                    <div className="mt-2 text-xl font-semibold text-emerald-600 dark:text-emerald-400">
+                                        ₱{zone.total.toLocaleString()}
+                                    </div>
+                                </div>
+                            ))}
                         </div>
-                    ))}
-                </div>
-            )}
+                    )}
 
-            {/* Progress Bar (Only in Cycle View) */}
-            {currentCycle && (
-                <ProgressBar
-                    stages={stages}
-                    currentStageId={currentCycle.currentStageId}
-                    onStageClick={handleStageClick}
-                />
-            )}
+                    {/* Progress Bar (Only in Cycle View) */}
+                    {currentCycle && (
+                        <ProgressBar
+                            stages={stages}
+                            currentStageId={currentCycle.currentStageId}
+                            onStageClick={handleStageClick}
+                        />
+                    )}
+                </div>
+
+                {/* Right Column: Weather */}
+                <div className="lg:col-span-1">
+                    <WeatherWidget
+                        coordinates={(() => {
+                            if (currentFarm?.coordinates) {
+                                try {
+                                    const parsed = typeof currentFarm.coordinates === 'string'
+                                        ? JSON.parse(currentFarm.coordinates)
+                                        : currentFarm.coordinates;
+                                    // Handle array [lat, lng] or object {lat, lng}
+                                    if (Array.isArray(parsed)) {
+                                        return { lat: parsed[0], long: parsed[1] };
+                                    }
+                                    return parsed;
+                                } catch (e) {
+                                    console.error("Error parsing farm coordinates for weather", e);
+                                    return null;
+                                }
+                            }
+                            return null;
+                        })()}
+                        farmName={currentFarm?.name}
+                    />
+                </div>
+            </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Recent Activity */}
