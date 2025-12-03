@@ -34,6 +34,54 @@ const LocationSelector = ({ isSelecting, onSelect }) => {
         },
     });
     return null;
+    return null;
+};
+
+// Component to auto-fit bounds to zones
+const AutoFitBounds = ({ zones }) => {
+    const map = useMap();
+
+    useEffect(() => {
+        if (!zones || zones.length === 0) return;
+
+        try {
+            const bounds = L.latLngBounds([]);
+            let hasValidPoints = false;
+
+            zones.forEach(zone => {
+                if (!zone.coordinates) return;
+                let parsed = typeof zone.coordinates === 'string' ? JSON.parse(zone.coordinates) : zone.coordinates;
+                if (typeof parsed === 'string') parsed = JSON.parse(parsed);
+
+                if (Array.isArray(parsed)) {
+                    // Helper to extract points recursively
+                    const extractPoints = (arr) => {
+                        if (Array.isArray(arr) && arr.length === 2 && typeof arr[0] === 'number') {
+                            return [arr];
+                        }
+                        if (Array.isArray(arr)) {
+                            return arr.flatMap(extractPoints);
+                        }
+                        return [];
+                    };
+
+                    const points = extractPoints(parsed);
+                    points.forEach(pt => {
+                        bounds.extend(pt);
+                        hasValidPoints = true;
+                    });
+                }
+            });
+
+            if (hasValidPoints && bounds.isValid()) {
+                map.fitBounds(bounds, { padding: [50, 50] });
+            }
+        } catch (e) {
+            console.error("Error auto-fitting bounds", e);
+        }
+    }, [zones, map]);
+
+    return null;
 };
 
 const MapComponent = ({
@@ -44,7 +92,9 @@ const MapComponent = ({
     zoom = 16, // Increased default zoom
     isSelectingLocation = false,
     onLocationSelect,
-    farmLocation
+    farmLocation,
+    onZoneDoubleClick,
+    autoFitBounds = false
 }) => {
     // Default center (can be adjusted or dynamic based on user location)
     const defaultCenter = [10.7, 122.9]; // Approx Negros/Panay area (sugar land)
@@ -55,6 +105,7 @@ const MapComponent = ({
             const latlngs = layer.getLatLngs()[0]; // Get array of LatLng objects
             const coordinates = latlngs.map(ll => [ll.lat, ll.lng]);
             onZoneCreated(coordinates);
+            layer.remove();
         }
     };
 
@@ -72,6 +123,7 @@ const MapComponent = ({
 
             <MapContainer center={center || defaultCenter} zoom={zoom} style={{ height: '100%', width: '100%' }}>
                 <MapController center={center} zoom={zoom} />
+                {autoFitBounds && <AutoFitBounds zones={zones} />}
                 <LocationSelector isSelecting={isSelectingLocation} onSelect={onLocationSelect} />
 
                 <TileLayer
@@ -96,14 +148,15 @@ const MapComponent = ({
                             marker: false,
                             polyline: false,
                             polygon: {
-                                allowIntersection: false,
+                                allowIntersection: true,
                                 drawError: {
                                     color: '#e1e100',
                                     message: '<strong>Oh snap!<strong> you can\'t draw that!'
                                 },
                                 shapeOptions: {
                                     color: '#10b981' // Emerald-500
-                                }
+                                },
+                                snapDistance: 5
                             }
                         }}
                     />
@@ -160,6 +213,12 @@ const MapComponent = ({
                             key={zone.id}
                             positions={validCoords}
                             pathOptions={{ color: '#10b981', fillColor: '#10b981', fillOpacity: 0.4 }}
+                            eventHandlers={{
+                                dblclick: (e) => {
+                                    L.DomEvent.stopPropagation(e);
+                                    if (onZoneDoubleClick) onZoneDoubleClick(zone);
+                                }
+                            }}
                         >
                             <Tooltip
                                 permanent

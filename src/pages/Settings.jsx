@@ -8,7 +8,7 @@ import { useFarm } from '../context/FarmContext';
 
 export const Settings = () => {
     const { theme, toggleTheme } = useTheme();
-    const { cycles, deleteCycle, currentFarm, deleteFarm } = useFarm();
+    const { cycles, deleteCycle, currentFarm, deleteFarm, updateFarm } = useFarm();
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -74,6 +74,27 @@ export const Settings = () => {
             await deleteFarm(farmToDelete.id);
             setIsFarmDeleteModalOpen(false);
             setFarmToDelete(null);
+        }
+    };
+
+    const [isEditFarmModalOpen, setIsEditFarmModalOpen] = useState(false);
+    const [farmFormData, setFarmFormData] = useState({ name: '' });
+
+    const handleEditFarm = (farm) => {
+        setFarmFormData({ name: farm.name });
+        setIsEditFarmModalOpen(true);
+    };
+
+    const handleUpdateFarm = async (e) => {
+        e.preventDefault();
+        if (!farmFormData.name.trim() || !currentFarm) return;
+
+        try {
+            await updateFarm(currentFarm.id, { name: farmFormData.name });
+            setIsEditFarmModalOpen(false);
+            setFarmFormData({ name: '' });
+        } catch (error) {
+            console.error("Failed to update farm", error);
         }
     };
 
@@ -287,12 +308,20 @@ export const Settings = () => {
                         <p className="font-medium text-gray-900 dark:text-white">{currentFarm?.name}</p>
                         <p className="text-xs text-gray-500 dark:text-gray-400">Current Farm</p>
                     </div>
-                    <button
-                        onClick={() => handleDeleteFarm(currentFarm)}
-                        className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium"
-                    >
-                        <Trash2 size={16} /> Delete Farm
-                    </button>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => handleEditFarm(currentFarm)}
+                            className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium"
+                        >
+                            <Pencil size={16} /> Edit Name
+                        </button>
+                        <button
+                            onClick={() => handleDeleteFarm(currentFarm)}
+                            className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium"
+                        >
+                            <Trash2 size={16} /> Delete Farm
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -487,6 +516,39 @@ export const Settings = () => {
                         </button>
                     </div>
                 </div>
+            </Modal>
+
+            {/* Edit Farm Modal */}
+            <Modal
+                isOpen={isEditFarmModalOpen}
+                onClose={() => setIsEditFarmModalOpen(false)}
+                title="Edit Farm Name"
+            >
+                <form onSubmit={handleUpdateFarm} className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Farm Name</label>
+                        <input
+                            type="text"
+                            required
+                            value={farmFormData.name}
+                            onChange={e => setFarmFormData({ ...farmFormData, name: e.target.value })}
+                            className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none dark:bg-gray-700 dark:text-white"
+                            placeholder="e.g., Nangan Farm"
+                        />
+                    </div>
+                    <div className="pt-2 flex justify-end gap-3">
+                        <button
+                            type="button"
+                            onClick={() => setIsEditFarmModalOpen(false)}
+                            className="btn btn-secondary dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600"
+                        >
+                            Cancel
+                        </button>
+                        <button type="submit" className="btn btn-primary">
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
             </Modal>
         </div>
     );

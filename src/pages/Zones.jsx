@@ -191,12 +191,25 @@ export const Zones = () => {
                         </div>
                     )}
                     <MapComponent
-                        zones={zones}
+                        zones={(() => {
+                            if (!isModalOpen || !formData.coordinates) return zones;
+                            if (editingZone) {
+                                return zones.map(z => z.id === editingZone.id ? { ...z, coordinates: formData.coordinates } : z);
+                            }
+                            return [...zones, {
+                                id: 'temp-new-zone',
+                                name: formData.name || 'New Zone',
+                                coordinates: formData.coordinates,
+                                area: formData.area,
+                                crop: formData.crop
+                            }];
+                        })()}
                         onZoneCreated={handleZoneCreated}
                         center={farmCenter}
                         farmLocation={farmCenter}
                         isSelectingLocation={isSelectingLocation}
                         onLocationSelect={handleFarmLocationSelect}
+                        onZoneDoubleClick={handleEnterZone}
                     />
                 </div>
             ) : (
@@ -227,7 +240,13 @@ export const Zones = () => {
                                     </button>
                                 </div>
 
-                                <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-3 pr-16">{zone.name}</h3>
+                                <h3
+                                    className="font-bold text-lg text-gray-900 dark:text-white mb-3 pr-16 cursor-pointer hover:text-emerald-600 transition-colors"
+                                    onDoubleClick={() => handleEnterZone(zone)}
+                                    title="Double click to manage zone"
+                                >
+                                    {zone.name}
+                                </h3>
 
                                 <div className="space-y-2 text-sm">
                                     <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">

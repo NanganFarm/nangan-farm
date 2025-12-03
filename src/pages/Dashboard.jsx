@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../services/api';
 import { useFarm } from '../context/FarmContext';
-import { DollarSign, CheckCircle2, Circle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { DollarSign, CheckCircle2, Circle, ChevronLeft, ChevronRight, Sprout, ArrowLeft, Map as MapIcon } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday, addMonths, subMonths, parseISO } from 'date-fns';
 import clsx from 'clsx';
 import { Modal } from '../components/Modal';
 import { WeatherWidget } from '../components/WeatherWidget';
+import MapComponent from '../components/MapComponent';
 
 const StatCard = ({ title, value, icon: Icon, color }) => (
     <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-start justify-between transition-colors">
@@ -142,7 +144,8 @@ const Calendar = ({ expenses }) => {
 };
 
 export const Dashboard = () => {
-    const { currentFarm, currentCycle, currentZone, updateCycleStage } = useFarm();
+    const { currentFarm, currentCycle, currentZone, updateCycleStage, enterZone, exitZone } = useFarm();
+    const navigate = useNavigate();
     const [expenses, setExpenses] = useState([]);
     const [zones, setZones] = useState([]);
     const [cycles, setCycles] = useState([]);
@@ -150,6 +153,7 @@ export const Dashboard = () => {
     const [loading, setLoading] = useState(true);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const [isEndCycleModalOpen, setIsEndCycleModalOpen] = useState(false);
+    const [isMapModalOpen, setIsMapModalOpen] = useState(false);
     const [targetStage, setTargetStage] = useState(null);
 
     useEffect(() => {
@@ -304,37 +308,80 @@ export const Dashboard = () => {
         );
     }
 
+    if (currentZone && !currentCycle) {
+        return (
+            <div className="flex flex-col items-center justify-center h-[60vh] text-center p-8">
+                <div className="bg-amber-100 p-4 rounded-full mb-4">
+                    <Sprout size={48} className="text-amber-600" />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">No Active Cycle</h2>
+                <p className="text-gray-500 max-w-md mb-6">
+                    This zone currently has no active crop cycle.
+                    Start a new cycle to track expenses and progress.
+                </p>
+                <div className="flex gap-3">
+                    <button
+                        onClick={exitZone}
+                        className="btn btn-secondary flex items-center gap-2"
+                    >
+                        <ArrowLeft size={16} />
+                        Back to Overview
+                    </button>
+                    <button
+                        onClick={() => navigate('/cycles')}
+                        className="btn btn-primary"
+                    >
+                        Create New Cycle
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                        {currentCycle ? `Dashboard: ${currentCycle.name}` : 'Farm Overview'}
-                    </h2>
+                    <div className="flex items-center gap-2 mb-1">
+                        {currentZone && (
+                            <button
+                                onClick={exitZone}
+                                className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full text-gray-500 transition-colors"
+                                title="Back to Farm Overview"
+                            >
+                                <ArrowLeft size={20} />
+                            </button>
+                        )}
+                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                            {currentCycle ? `Dashboard: ${currentCycle.name}` : (currentZone ? `Zone: ${currentZone.name}` : currentFarm?.name)}
+                        </h2>
+                    </div>
                     <p className="text-gray-500 dark:text-gray-400">
                         {currentCycle
                             ? 'Track your crop progress and expenses.'
                             : 'Aggregated view of all zones and expenses.'}
                     </p>
                 </div>
-                {currentCycle && currentCycle.status !== 'completed' && (
-                    (() => {
-                        const lastStage = stages[stages.length - 1];
-                        const isLastStage = lastStage && currentCycle.currentStageId === lastStage.id;
+                <div className="flex gap-2">
+                    {currentCycle && currentCycle.status !== 'completed' && (
+                        (() => {
+                            const lastStage = stages[stages.length - 1];
+                            const isLastStage = lastStage && currentCycle.currentStageId === lastStage.id;
 
-                        if (isLastStage) {
-                            return (
-                                <button
-                                    onClick={() => setIsEndCycleModalOpen(true)}
-                                    className="btn bg-red-600 hover:bg-red-700 text-white border-red-600"
-                                >
-                                    End Cycle
-                                </button>
-                            );
-                        }
-                        return null;
-                    })()
-                )}
+                            if (isLastStage) {
+                                return (
+                                    <button
+                                        onClick={() => setIsEndCycleModalOpen(true)}
+                                        className="btn bg-red-600 hover:bg-red-700 text-white border-red-600"
+                                    >
+                                        End Cycle
+                                    </button>
+                                );
+                            }
+                            return null;
+                        })()
+                    )}
+                </div>
             </div>
 
             {/* Top Section: Stats & Weather */}
@@ -369,11 +416,18 @@ export const Dashboard = () => {
                         />
                     </div>
 
+
+
                     {/* Zone Breakdown (Only in Farm View) */}
                     {!currentCycle && zones.length > 0 && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {zoneTotals.map(zone => (
-                                <div key={zone.id} className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                                <div
+                                    key={zone.id}
+                                    className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 cursor-pointer hover:border-emerald-500 transition-colors"
+                                    onDoubleClick={() => enterZone(zone)}
+                                    title="Double click to manage zone"
+                                >
                                     <h4 className="font-bold text-gray-900 dark:text-white">{zone.name}</h4>
                                     <p className="text-sm text-gray-500 dark:text-gray-400">{zone.crop} • {zone.area}</p>
                                     <div className="mt-2 text-xl font-semibold text-emerald-600 dark:text-emerald-400">
@@ -417,6 +471,60 @@ export const Dashboard = () => {
                         })()}
                         farmName={currentFarm?.name}
                     />
+
+                    {/* Mini Map */}
+                    <div className="mt-6 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="font-bold text-gray-900 dark:text-white">Farm Map</h3>
+                            <button
+                                onClick={() => setIsMapModalOpen(true)}
+                                className="text-sm text-emerald-600 hover:text-emerald-700 font-medium"
+                            >
+                                Expand
+                            </button>
+                        </div>
+                        <div
+                            className="h-80 rounded-lg overflow-hidden relative cursor-pointer group"
+                            onClick={() => setIsMapModalOpen(true)}
+                        >
+                            <MapComponent
+                                zones={zones}
+                                center={(() => {
+                                    if (currentFarm?.coordinates) {
+                                        try {
+                                            const parsed = typeof currentFarm.coordinates === 'string'
+                                                ? JSON.parse(currentFarm.coordinates)
+                                                : currentFarm.coordinates;
+                                            return Array.isArray(parsed) ? parsed : [parsed.lat, parsed.long];
+                                        } catch (e) { return null; }
+                                    }
+                                    return null;
+                                })()}
+                                farmLocation={(() => {
+                                    if (currentFarm?.coordinates) {
+                                        try {
+                                            const parsed = typeof currentFarm.coordinates === 'string'
+                                                ? JSON.parse(currentFarm.coordinates)
+                                                : currentFarm.coordinates;
+                                            return Array.isArray(parsed) ? parsed : [parsed.lat, parsed.long];
+                                        } catch (e) { return null; }
+                                    }
+                                    return null;
+                                })()}
+                                zoom={15}
+                                autoFitBounds={true}
+                                onZoneDoubleClick={(zone) => {
+                                    enterZone(zone);
+                                }}
+                            />
+                            {/* Overlay */}
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center pointer-events-none">
+                                <span className="opacity-0 group-hover:opacity-100 bg-white/90 text-gray-800 px-3 py-1 rounded-full text-sm font-medium shadow-sm transition-opacity">
+                                    Click to Expand
+                                </span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -486,6 +594,46 @@ export const Dashboard = () => {
                 onClose={() => setIsEndCycleModalOpen(false)}
                 cycle={currentCycle}
             />
+
+            {/* Map View Modal */}
+            <Modal
+                isOpen={isMapModalOpen}
+                onClose={() => setIsMapModalOpen(false)}
+                title="Farm Map"
+                maxWidth="max-w-6xl"
+            >
+                <div className="h-[80vh]">
+                    <MapComponent
+                        zones={zones}
+                        center={(() => {
+                            if (currentFarm?.coordinates) {
+                                try {
+                                    const parsed = typeof currentFarm.coordinates === 'string'
+                                        ? JSON.parse(currentFarm.coordinates)
+                                        : currentFarm.coordinates;
+                                    return Array.isArray(parsed) ? parsed : [parsed.lat, parsed.long];
+                                } catch (e) { return null; }
+                            }
+                            return null;
+                        })()}
+                        farmLocation={(() => {
+                            if (currentFarm?.coordinates) {
+                                try {
+                                    const parsed = typeof currentFarm.coordinates === 'string'
+                                        ? JSON.parse(currentFarm.coordinates)
+                                        : currentFarm.coordinates;
+                                    return Array.isArray(parsed) ? parsed : [parsed.lat, parsed.long];
+                                } catch (e) { return null; }
+                            }
+                            return null;
+                        })()}
+                        onZoneDoubleClick={(zone) => {
+                            enterZone(zone);
+                            setIsMapModalOpen(false);
+                        }}
+                    />
+                </div>
+            </Modal>
         </div>
     );
 };

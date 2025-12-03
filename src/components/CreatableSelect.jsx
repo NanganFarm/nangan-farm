@@ -89,6 +89,17 @@ export const CreatableSelect = ({
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             onClick={(e) => e.stopPropagation()} // Prevent closing when clicking input
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    if (filteredOptions.length > 0) {
+                                        handleSelect(filteredOptions[0]);
+                                    } else if (searchTerm && !exactMatch) {
+                                        handleCreate();
+                                    }
+                                }
+                            }}
                         />
                     </div>
 

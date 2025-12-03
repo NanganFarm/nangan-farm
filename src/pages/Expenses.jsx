@@ -189,7 +189,7 @@ export const Expenses = () => {
                 name: newCategoryName,
                 userId: currentUser.id
             });
-            setCategories([...categories, newCategory]);
+            setCategories(prev => [...prev, newCategory]);
             setFormData(prev => ({ ...prev, category: newCategory.name }));
         } catch (error) {
             console.error("Failed to create category:", error);
@@ -214,16 +214,21 @@ export const Expenses = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!formData.amount || !formData.category) return;
+        if (!formData.amount || !formData.category) {
+            alert("Please fill in Amount and Category.");
+            return;
+        }
 
         try {
+            const expenseData = {
+                ...formData,
+                amount: Number(formData.amount),
+                stageId: formData.stageId || null, // Ensure empty string becomes null
+                receiptImage: receiptImage
+            };
+
             if (editingExpense) {
-                const updates = {
-                    ...formData,
-                    amount: Number(formData.amount),
-                    receiptImage: receiptImage
-                };
-                const updatedExpense = await api.updateExpense(editingExpense.id, updates);
+                const updatedExpense = await api.updateExpense(editingExpense.id, expenseData);
                 setExpenses(expenses.map(e => e.id === editingExpense.id ? updatedExpense : e));
             } else {
                 if (!currentUser) {
@@ -231,15 +236,12 @@ export const Expenses = () => {
                     return;
                 }
                 const newExpense = {
-                    ...formData,
-                    amount: Number(formData.amount),
+                    ...expenseData,
                     createdAt: new Date().toISOString(),
                     farmId: currentFarm.id,
-                    cycleId: currentCycle.id,
+                    cycleId: currentCycle ? currentCycle.id : null, // Handle no cycle
                     zoneId: currentZone?.id || null,
-                    userId: currentUser.id,
-                    stageId: formData.stageId,
-                    receiptImage: receiptImage
+                    userId: currentUser.id
                 };
                 const savedExpense = await api.addExpense(newExpense);
                 setExpenses([savedExpense, ...expenses]);
@@ -250,6 +252,7 @@ export const Expenses = () => {
             setFormData(prev => ({ ...prev, amount: '', description: '' })); // Reset fields
         } catch (error) {
             console.error("Failed to save expense", error);
+            alert(`Failed to save expense: ${error.message}`);
         }
     };
 
@@ -507,11 +510,11 @@ export const Expenses = () => {
                                     <div className="flex items-center gap-2">Date <SortIcon columnKey="date" /></div>
                                 </th>
                                 {!currentCycle && <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Zone</th>}
-                                <th className="px-6 py-4 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" onClick={() => handleSort('description')}>
-                                    <div className="flex items-center gap-2">Description <SortIcon columnKey="description" /></div>
-                                </th>
                                 <th className="px-6 py-4 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" onClick={() => handleSort('category')}>
                                     <div className="flex items-center gap-2">Category <SortIcon columnKey="category" /></div>
+                                </th>
+                                <th className="px-6 py-4 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" onClick={() => handleSort('description')}>
+                                    <div className="flex items-center gap-2">Description <SortIcon columnKey="description" /></div>
                                 </th>
                                 <th className="px-6 py-4 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" onClick={() => handleSort('stage')}>
                                     <div className="flex items-center gap-2">Stage <SortIcon columnKey="stage" /></div>
@@ -538,12 +541,12 @@ export const Expenses = () => {
                                                 </span>
                                             </td>
                                         )}
-                                        <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{expense.description || '-'}</td>
                                         <td className="px-6 py-4">
-                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-emerald-100 text-emerald-800">
                                                 {expense.category}
                                             </span>
                                         </td>
+                                        <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{expense.description || '-'}</td>
                                         <td className="px-6 py-4 text-gray-500 dark:text-gray-400">{expense.stage}</td>
                                         <td className="px-6 py-4 text-right font-semibold text-gray-900 dark:text-white">
                                             ₱{Number(expense.amount).toLocaleString()}
