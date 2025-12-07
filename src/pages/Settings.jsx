@@ -180,16 +180,16 @@ export const Settings = () => {
             </div>
 
             {/* System Check Section */}
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+            <div className="card">
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                        <div className={`w-2 h-2 rounded-full animate-pulse ${loading ? 'bg-amber-500' : 'bg-emerald-500'}`}></div>
+                        <div className={`w-2 h-2 rounded-full animate-pulse ${loading ? 'bg-accent-500' : 'bg-primary-500'}`}></div>
                         System Diagnostics
                     </h3>
                     <button
                         onClick={runDiagnostics}
                         disabled={loading}
-                        className="text-sm bg-emerald-100 text-emerald-700 px-3 py-1 rounded-lg hover:bg-emerald-200 transition-colors disabled:opacity-50"
+                        className="text-sm bg-primary-100 text-primary-700 px-3 py-1 rounded-lg hover:bg-primary-200 transition-colors disabled:opacity-50 dark:bg-primary-900/20 dark:text-primary-300 dark:hover:bg-primary-900/30"
                     >
                         {loading ? 'Running...' : 'Run Test'}
                     </button>
@@ -200,19 +200,19 @@ export const Settings = () => {
                         <p className="text-xs text-gray-500 dark:text-gray-400 uppercase font-bold">Connectivity</p>
                         <div className="flex items-center justify-between">
                             <span className="text-sm text-gray-700 dark:text-gray-300">Internet Status</span>
-                            <span className={`text-sm font-medium ${diagnosticResults.internet === 'Online' ? 'text-emerald-600' : 'text-red-600'}`}>
+                            <span className={`text-sm font-medium ${diagnosticResults.internet === 'Online' ? 'text-primary-600' : 'text-red-600'}`}>
                                 {diagnosticResults.internet}
                             </span>
                         </div>
                         <div className="flex items-center justify-between">
                             <span className="text-sm text-gray-700 dark:text-gray-300">Database Read</span>
-                            <span className={`text-sm font-medium ${diagnosticResults.dbRead === 'Success' ? 'text-emerald-600' : diagnosticResults.dbRead === 'Failed' ? 'text-red-600' : 'text-gray-400'}`}>
+                            <span className={`text-sm font-medium ${diagnosticResults.dbRead === 'Success' ? 'text-primary-600' : diagnosticResults.dbRead === 'Failed' ? 'text-red-600' : 'text-gray-400'}`}>
                                 {diagnosticResults.dbRead}
                             </span>
                         </div>
                         <div className="flex items-center justify-between">
                             <span className="text-sm text-gray-700 dark:text-gray-300">Database Write</span>
-                            <span className={`text-sm font-medium ${diagnosticResults.dbWrite === 'Success' ? 'text-emerald-600' : diagnosticResults.dbWrite === 'Failed' ? 'text-red-600' : 'text-gray-400'}`}>
+                            <span className={`text-sm font-medium ${diagnosticResults.dbWrite === 'Success' ? 'text-primary-600' : diagnosticResults.dbWrite === 'Failed' ? 'text-red-600' : 'text-gray-400'}`}>
                                 {diagnosticResults.dbWrite}
                             </span>
                         </div>
@@ -223,7 +223,7 @@ export const Settings = () => {
                             {currentUser ? currentUser.id : 'Not Logged In'}
                         </code>
                         {currentUser && (
-                            <p className="text-xs text-emerald-600">Session Active</p>
+                            <p className="text-xs text-primary-600">Session Active</p>
                         )}
                     </div>
                 </div>
@@ -235,9 +235,9 @@ export const Settings = () => {
             </div>
 
             {/* Appearance Section */}
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+            <div className="card">
                 <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                    <Sun size={20} className="text-amber-500" /> Appearance
+                    <Sun size={20} className="text-accent-500" /> Appearance
                 </h3>
                 <div className="flex items-center justify-between">
                     <div>
@@ -246,7 +246,7 @@ export const Settings = () => {
                     </div>
                     <button
                         onClick={toggleTheme}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 ${theme === 'dark' ? 'bg-emerald-600' : 'bg-gray-200'}`}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${theme === 'dark' ? 'bg-primary-600' : 'bg-gray-200'}`}
                     >
                         <span
                             className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${theme === 'dark' ? 'translate-x-6' : 'translate-x-1'}`}
@@ -256,14 +256,14 @@ export const Settings = () => {
             </div>
 
             {/* Categories Section */}
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+            <div className="card">
                 <div className="flex items-center justify-between mb-6">
                     <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                        <Tag size={20} className="text-emerald-600" /> Expense Categories
+                        <Tag size={20} className="text-primary-600" /> Expense Categories
                     </h3>
                     <button
                         onClick={() => setIsModalOpen(true)}
-                        className="btn btn-primary text-sm"
+                        className="btn btn-primary text-sm shadow-lg shadow-primary-900/20"
                     >
                         <Plus size={16} /> Add Category
                     </button>
@@ -279,7 +279,7 @@ export const Settings = () => {
                                 <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button
                                         onClick={() => handleEdit(category)}
-                                        className="p-1 text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                                        className="p-1 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
                                         title="Edit"
                                     >
                                         <Pencil size={16} />
@@ -299,9 +299,9 @@ export const Settings = () => {
             </div>
 
             {/* Farm Management Section */}
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+            <div className="card">
                 <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                    <Tag size={20} className="text-emerald-600" /> Farm Management
+                    <Tag size={20} className="text-primary-600" /> Farm Management
                 </h3>
                 <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                     <div>
@@ -326,9 +326,9 @@ export const Settings = () => {
             </div>
 
             {/* Cycle Management Section */}
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+            <div className="card">
                 <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                    <Sprout size={20} className="text-emerald-600" /> Cycle Management
+                    <Sprout size={20} className="text-primary-600" /> Cycle Management
                 </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
                     Manage cycles for <span className="font-medium text-gray-900 dark:text-white">{currentFarm?.name}</span>.
@@ -343,7 +343,7 @@ export const Settings = () => {
                                 <div>
                                     <span className="font-medium text-gray-700 dark:text-gray-200">{cycle.name}</span>
                                     {cycle.status === 'active' && (
-                                        <span className="ml-2 text-xs bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded-full">Active</span>
+                                        <span className="ml-2 text-xs bg-primary-100 text-primary-800 px-1.5 py-0.5 rounded-full dark:bg-primary-900/30 dark:text-primary-300">Active</span>
                                     )}
                                 </div>
                                 <button
@@ -360,7 +360,7 @@ export const Settings = () => {
             </div>
 
             {/* Data Management Section */}
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+            <div className="card">
                 <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                     <Trash2 size={20} className="text-red-600" /> Data Management
                 </h3>
@@ -428,7 +428,7 @@ export const Settings = () => {
                             required
                             value={formData.name}
                             onChange={e => setFormData({ ...formData, name: e.target.value })}
-                            className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none dark:bg-gray-700 dark:text-white"
+                            className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none dark:bg-gray-700 dark:text-white transition-all"
                             placeholder="e.g., Fertilizers"
                         />
                     </div>
@@ -440,7 +440,7 @@ export const Settings = () => {
                         >
                             Cancel
                         </button>
-                        <button type="submit" className="btn btn-primary">
+                        <button type="submit" className="btn btn-primary shadow-lg shadow-primary-900/20">
                             Save Category
                         </button>
                     </div>
@@ -460,7 +460,7 @@ export const Settings = () => {
                     <p className="text-gray-600 dark:text-gray-300">
                         Are you sure you want to delete <span className="font-bold text-gray-900 dark:text-white">{cycleToDelete?.name}</span>?
                     </p>
-                    <div className="p-3 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200 text-sm rounded-lg border border-amber-200 dark:border-amber-800">
+                    <div className="p-3 bg-accent-50 dark:bg-accent-900/20 text-accent-800 dark:text-accent-200 text-sm rounded-lg border border-accent-200 dark:border-accent-800">
                         Warning: This action cannot be undone. Associated expenses will remain but will be unlinked.
                     </div>
                     <div className="flex justify-end gap-3 pt-2">
@@ -475,7 +475,7 @@ export const Settings = () => {
                         </button>
                         <button
                             onClick={confirmDeleteCycle}
-                            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-lg shadow-red-900/20"
                         >
                             Delete Cycle
                         </button>
@@ -510,7 +510,7 @@ export const Settings = () => {
                         </button>
                         <button
                             onClick={confirmDeleteFarm}
-                            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-lg shadow-red-900/20"
                         >
                             Delete Farm
                         </button>
@@ -532,7 +532,7 @@ export const Settings = () => {
                             required
                             value={farmFormData.name}
                             onChange={e => setFarmFormData({ ...farmFormData, name: e.target.value })}
-                            className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none dark:bg-gray-700 dark:text-white"
+                            className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none dark:bg-gray-700 dark:text-white transition-all"
                             placeholder="e.g., Nangan Farm"
                         />
                     </div>
@@ -544,7 +544,7 @@ export const Settings = () => {
                         >
                             Cancel
                         </button>
-                        <button type="submit" className="btn btn-primary">
+                        <button type="submit" className="btn btn-primary shadow-lg shadow-primary-900/20">
                             Save Changes
                         </button>
                     </div>

@@ -45,8 +45,8 @@ const TaskCalendar = ({ tasks, onDateClick }) => {
                             key={day.toString()}
                             onClick={() => onDateClick(day)}
                             className={clsx(
-                                "min-h-[80px] p-2 rounded-lg border transition-colors cursor-pointer hover:border-emerald-500",
-                                isToday(day) ? "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200" : "bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700"
+                                "min-h-[80px] p-2 rounded-lg border transition-colors cursor-pointer hover:border-primary-500",
+                                isToday(day) ? "bg-primary-50 dark:bg-primary-900/20 border-primary-200" : "bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700"
                             )}
                         >
                             <div className="text-right text-xs mb-1 text-gray-500">{format(day, 'd')}</div>
@@ -55,7 +55,7 @@ const TaskCalendar = ({ tasks, onDateClick }) => {
                                     <div key={task.id} className={clsx(
                                         "text-[10px] px-1 py-0.5 rounded truncate",
                                         task.status === 'completed' ? "bg-gray-100 text-gray-500 line-through" :
-                                            task.priority === 'high' ? "bg-red-100 text-red-700" : "bg-blue-100 text-blue-700"
+                                            task.priority === 'high' ? "bg-red-100 text-red-700" : "bg-slate-100 text-slate-700"
                                     )}>
                                         {task.title}
                                     </div>
@@ -110,14 +110,7 @@ export const Tasks = () => {
             await api.addTask({
                 ...newTask,
                 farmId: currentFarm.id,
-                userId: currentFarm.userId, // Assuming context has userId or we get it from auth
-                // Note: FarmContext might not expose userId directly on currentFarm object depending on how it's fetched
-                // We should ensure userId is available. If not, api.addTask might fail RLS if not passed?
-                // Actually api.addTask uses auth.uid() for RLS check, but we need to pass user_id to insert.
-                // Let's assume currentFarm has userId or we can get it.
-                // If currentFarm doesn't have userId, we might need to fetch user.
-                // For now, let's try.
-                userId: (await api.getFarms(currentFarm.userId))[0]?.user_id // Hacky fallback if needed, but currentFarm should have it
+                userId: currentFarm.user_id
             });
             setIsModalOpen(false);
             setNewTask({ title: '', description: '', dueDate: '', priority: 'medium', zoneId: '' });
@@ -160,25 +153,25 @@ export const Tasks = () => {
                     <div className="flex bg-white dark:bg-gray-800 rounded-lg p-1 border border-gray-200 dark:border-gray-700">
                         <button
                             onClick={() => setView('list')}
-                            className={clsx("p-2 rounded-md transition-colors", view === 'list' ? "bg-emerald-100 text-emerald-700" : "text-gray-500 hover:bg-gray-100")}
+                            className={clsx("p-2 rounded-md transition-colors", view === 'list' ? "bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300" : "text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700")}
                         >
                             <List size={20} />
                         </button>
                         <button
                             onClick={() => setView('calendar')}
-                            className={clsx("p-2 rounded-md transition-colors", view === 'calendar' ? "bg-emerald-100 text-emerald-700" : "text-gray-500 hover:bg-gray-100")}
+                            className={clsx("p-2 rounded-md transition-colors", view === 'calendar' ? "bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300" : "text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700")}
                         >
                             <CalendarIcon size={20} />
                         </button>
                     </div>
-                    <button onClick={() => setIsModalOpen(true)} className="btn btn-primary flex items-center gap-2">
+                    <button onClick={() => setIsModalOpen(true)} className="btn btn-primary flex items-center gap-2 shadow-lg shadow-primary-900/20">
                         <Plus size={20} /> New Task
                     </button>
                 </div>
             </div>
 
             {view === 'list' ? (
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                <div className="card overflow-hidden">
                     {filteredTasks.length === 0 ? (
                         <div className="p-8 text-center text-gray-500">No tasks found.</div>
                     ) : (
@@ -190,7 +183,7 @@ export const Tasks = () => {
                                             onClick={() => toggleStatus(task)}
                                             className={clsx(
                                                 "mt-1 w-5 h-5 rounded-full border flex items-center justify-center transition-colors",
-                                                task.status === 'completed' ? "bg-emerald-500 border-emerald-500 text-white" : "border-gray-300 text-transparent hover:border-emerald-500"
+                                                task.status === 'completed' ? "bg-primary-500 border-primary-500 text-white" : "border-gray-300 text-transparent hover:border-primary-500"
                                             )}
                                         >
                                             <CheckCircle2 size={14} />
@@ -214,8 +207,8 @@ export const Tasks = () => {
                                                 <span className={clsx(
                                                     "px-1.5 py-0.5 rounded capitalize",
                                                     task.priority === 'high' ? "bg-red-100 text-red-700" :
-                                                        task.priority === 'medium' ? "bg-yellow-100 text-yellow-700" :
-                                                            "bg-blue-100 text-blue-700"
+                                                        task.priority === 'medium' ? "bg-accent-100 text-accent-700" :
+                                                            "bg-slate-100 text-slate-700"
                                                 )}>
                                                     {task.priority}
                                                 </span>

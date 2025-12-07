@@ -10,12 +10,12 @@ import { WeatherWidget } from '../components/WeatherWidget';
 import MapComponent from '../components/MapComponent';
 
 const StatCard = ({ title, value, icon: Icon, color }) => (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-start justify-between transition-colors">
+    <div className="card flex items-start justify-between group hover:shadow-md transition-all duration-200">
         <div>
             <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{title}</p>
-            <h3 className="text-2xl font-bold mt-1 text-gray-900 dark:text-white">{value}</h3>
+            <h3 className="text-2xl font-bold mt-1 text-gray-900 dark:text-white group-hover:text-primary-600 transition-colors">{value}</h3>
         </div>
-        <div className={`p-3 rounded-lg ${color}`}>
+        <div className={`p-3 rounded-xl ${color} shadow-sm group-hover:scale-110 transition-transform duration-200`}>
             <Icon size={24} className="text-white" />
         </div>
     </div>
@@ -25,14 +25,17 @@ const ProgressBar = ({ stages, currentStageId, onStageClick }) => {
     const currentIndex = stages.findIndex(s => s.id === currentStageId);
 
     return (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 mb-8 transition-colors">
-            <h3 className="font-bold text-gray-900 dark:text-white mb-6">Crop Progress</h3>
+        <div className="card mb-8">
+            <h3 className="font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+                <Sprout size={20} className="text-primary-500" />
+                Crop Progress
+            </h3>
             <div className="w-full">
                 <div className="relative flex items-center justify-between px-2 md:px-10 z-0 w-full">
                     {/* Progress Line */}
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-gray-200 z-0 pointer-events-none"></div>
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-gray-100 dark:bg-gray-700 z-0 pointer-events-none rounded-full"></div>
                     <div
-                        className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-emerald-500 z-0 transition-all duration-500 pointer-events-none"
+                        className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-gradient-to-r from-primary-500 to-accent-500 z-0 transition-all duration-1000 ease-out pointer-events-none rounded-full"
                         style={{ width: `${(currentIndex / (stages.length - 1)) * 100}%` }}
                     ></div>
 
@@ -50,15 +53,15 @@ const ProgressBar = ({ stages, currentStageId, onStageClick }) => {
                                 }}
                             >
                                 <div className={clsx(
-                                    "w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center border-4 transition-all duration-300 bg-white dark:bg-gray-800",
-                                    isCompleted ? "border-emerald-500 text-emerald-500" : "border-gray-200 dark:border-gray-600 text-gray-300 dark:text-gray-600",
-                                    isCurrent && "ring-4 ring-emerald-100 dark:ring-emerald-900 scale-110"
+                                    "w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center border-4 transition-all duration-300 shadow-sm",
+                                    isCompleted ? "bg-primary-500 border-primary-500 text-white" : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-300 dark:text-gray-600",
+                                    isCurrent && "ring-4 ring-accent-200 dark:ring-accent-900 scale-110 border-accent-500 bg-accent-500 text-primary-900"
                                 )}>
-                                    {isCompleted ? <CheckCircle2 size={16} className="md:w-5 md:h-5 text-white" fill="currentColor" /> : <Circle size={16} className="md:w-5 md:h-5" />}
+                                    {isCompleted && !isCurrent ? <CheckCircle2 size={16} className="md:w-5 md:h-5" /> : <Circle size={16} className="md:w-5 md:h-5" />}
                                 </div>
                                 <span className={clsx(
-                                    "text-[10px] md:text-xs font-medium transition-colors absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap",
-                                    isCompleted ? "text-emerald-700 dark:text-emerald-400" : "text-gray-400 dark:text-gray-500"
+                                    "text-[10px] md:text-xs font-bold transition-all absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap px-2 py-0.5 rounded-full",
+                                    isCurrent ? "bg-accent-100 text-accent-800 dark:bg-accent-900/30 dark:text-accent-300" : (isCompleted ? "text-primary-700 dark:text-primary-400" : "text-gray-400 dark:text-gray-500")
                                 )}>
                                     {stage.name}
                                 </span>
@@ -67,7 +70,7 @@ const ProgressBar = ({ stages, currentStageId, onStageClick }) => {
                     })}
                 </div>
             </div>
-            <div className="h-10"></div> {/* Spacer for labels */}
+            <div className="h-8"></div> {/* Spacer for labels */}
         </div>
     );
 };
@@ -83,25 +86,30 @@ const Calendar = ({ expenses }) => {
     };
 
     return (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors">
+        <div className="card h-full">
             <div className="flex items-center justify-between mb-6">
-                <h3 className="font-bold text-gray-900 dark:text-white">Event Calendar</h3>
-                <div className="flex items-center gap-2">
-                    <button onClick={() => setCurrentDate(subMonths(currentDate, 1))} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-600 dark:text-gray-300">
-                        <ChevronLeft size={20} />
+                <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <span className="bg-primary-100 dark:bg-primary-900/30 p-1.5 rounded-lg text-primary-600 dark:text-primary-400">
+                        <MapIcon size={18} />
+                    </span>
+                    Event Calendar
+                </h3>
+                <div className="flex items-center gap-1 bg-gray-50 dark:bg-gray-800/50 p-1 rounded-lg border border-gray-100 dark:border-gray-700">
+                    <button onClick={() => setCurrentDate(subMonths(currentDate, 1))} className="p-1 hover:bg-white dark:hover:bg-gray-700 rounded-md text-gray-500 hover:text-primary-600 transition-all shadow-sm">
+                        <ChevronLeft size={18} />
                     </button>
-                    <span className="font-medium text-gray-700 dark:text-gray-200 min-w-[100px] text-center">
+                    <span className="font-semibold text-gray-700 dark:text-gray-200 min-w-[100px] text-center text-sm">
                         {format(currentDate, 'MMMM yyyy')}
                     </span>
-                    <button onClick={() => setCurrentDate(addMonths(currentDate, 1))} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-600 dark:text-gray-300">
-                        <ChevronRight size={20} />
+                    <button onClick={() => setCurrentDate(addMonths(currentDate, 1))} className="p-1 hover:bg-white dark:hover:bg-gray-700 rounded-md text-gray-500 hover:text-primary-600 transition-all shadow-sm">
+                        <ChevronRight size={18} />
                     </button>
                 </div>
             </div>
 
             <div className="grid grid-cols-7 gap-2 mb-2">
                 {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                    <div key={day} className="text-center text-xs font-medium text-gray-400 py-1">
+                    <div key={day} className="text-center text-[10px] uppercase tracking-wider font-bold text-gray-400 py-1">
                         {day}
                     </div>
                 ))}
@@ -116,23 +124,26 @@ const Calendar = ({ expenses }) => {
                         <div
                             key={day.toString()}
                             className={clsx(
-                                "aspect-square rounded-lg border p-1 flex flex-col items-center justify-start relative hover:border-emerald-500 transition-colors cursor-pointer min-h-[50px]",
-                                isToday(day) ? "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800" : "border-gray-50 dark:border-gray-700",
-                                hasEvents && "border-emerald-100 dark:border-emerald-800 bg-emerald-50/30 dark:bg-emerald-900/10"
+                                "aspect-square rounded-xl border p-1 flex flex-col items-center justify-start relative transition-all duration-200 cursor-pointer min-h-[50px] group",
+                                isToday(day) ? "bg-primary-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-800 shadow-inner" : "border-gray-50 dark:border-gray-700 hover:border-primary-200 dark:hover:border-primary-700 hover:shadow-sm",
+                                hasEvents && !isToday(day) && "bg-gray-50 dark:bg-gray-800/50"
                             )}
                             title={dayExpenses.map(e => `${e.description || e.category}: ₱${Number(e.amount).toLocaleString()}`).join('\n')}
                         >
                             <span className={clsx(
-                                "text-xs font-medium",
-                                isToday(day) ? "text-emerald-600 dark:text-emerald-400" : "text-gray-600 dark:text-gray-400"
+                                "text-xs font-medium w-6 h-6 flex items-center justify-center rounded-full mb-1",
+                                isToday(day) ? "bg-primary-500 text-white shadow-sm" : "text-gray-600 dark:text-gray-400 group-hover:bg-gray-100 dark:group-hover:bg-gray-700"
                             )}>
                                 {format(day, 'd')}
                             </span>
                             {hasEvents && (
-                                <div className="mt-1 flex gap-0.5 flex-wrap justify-center">
-                                    {dayExpenses.map((_, i) => (
-                                        <div key={i} className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                <div className="flex gap-0.5 flex-wrap justify-center content-start w-full px-1">
+                                    {dayExpenses.slice(0, 4).map((_, i) => (
+                                        <div key={i} className="w-1.5 h-1.5 rounded-full bg-accent-500 shadow-sm" />
                                     ))}
+                                    {dayExpenses.length > 4 && (
+                                        <div className="w-1.5 h-1.5 rounded-full bg-gray-300" />
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -296,11 +307,11 @@ export const Dashboard = () => {
     if (!currentFarm) {
         return (
             <div className="flex flex-col items-center justify-center h-[60vh] text-center p-8">
-                <div className="bg-emerald-100 p-4 rounded-full mb-4">
-                    <DollarSign size={48} className="text-emerald-600" />
+                <div className="bg-primary-50 p-6 rounded-full mb-6 shadow-sm">
+                    <DollarSign size={48} className="text-primary-600" />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome to Nangan Farm!</h2>
-                <p className="text-gray-500 max-w-md mb-6">
+                <p className="text-gray-500 max-w-md mb-8">
                     It looks like you haven't created any farms yet.
                     Click the <strong>"Add New Farm"</strong> button in the sidebar to get started.
                 </p>
@@ -311,11 +322,11 @@ export const Dashboard = () => {
     if (currentZone && !currentCycle) {
         return (
             <div className="flex flex-col items-center justify-center h-[60vh] text-center p-8">
-                <div className="bg-amber-100 p-4 rounded-full mb-4">
-                    <Sprout size={48} className="text-amber-600" />
+                <div className="bg-accent-100 p-6 rounded-full mb-6 shadow-sm">
+                    <Sprout size={48} className="text-accent-600" />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">No Active Cycle</h2>
-                <p className="text-gray-500 max-w-md mb-6">
+                <p className="text-gray-500 max-w-md mb-8">
                     This zone currently has no active crop cycle.
                     Start a new cycle to track expenses and progress.
                 </p>
@@ -339,7 +350,7 @@ export const Dashboard = () => {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-8">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <div className="flex items-center gap-2 mb-1">
@@ -372,7 +383,7 @@ export const Dashboard = () => {
                                 return (
                                     <button
                                         onClick={() => setIsEndCycleModalOpen(true)}
-                                        className="btn bg-red-600 hover:bg-red-700 text-white border-red-600"
+                                        className="btn bg-red-600 hover:bg-red-700 text-white border-red-600 shadow-sm hover:shadow-red-500/30"
                                     >
                                         End Cycle
                                     </button>
@@ -394,7 +405,7 @@ export const Dashboard = () => {
                             title="Total Expenses"
                             value={`₱${totalExpenses.toLocaleString()}`}
                             icon={DollarSign}
-                            color="bg-emerald-500"
+                            color="bg-primary-500"
                         />
                         <StatCard
                             title={currentCycle ? "Current Stage" : "Active Zones"}
@@ -403,7 +414,7 @@ export const Dashboard = () => {
                                 : zones.length
                             }
                             icon={CheckCircle2}
-                            color="bg-blue-500"
+                            color="bg-accent-500"
                         />
                         <StatCard
                             title={currentCycle ? "Days Active" : "Total Cycles"}
@@ -412,7 +423,7 @@ export const Dashboard = () => {
                                 : cycles.length
                             }
                             icon={Circle}
-                            color="bg-purple-500"
+                            color="bg-blue-500"
                         />
                     </div>
 
@@ -424,13 +435,20 @@ export const Dashboard = () => {
                             {zoneTotals.map(zone => (
                                 <div
                                     key={zone.id}
-                                    className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 cursor-pointer hover:border-emerald-500 transition-colors"
+                                    className="card cursor-pointer hover:border-primary-500 transition-all group"
                                     onDoubleClick={() => enterZone(zone)}
                                     title="Double click to manage zone"
                                 >
-                                    <h4 className="font-bold text-gray-900 dark:text-white">{zone.name}</h4>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400">{zone.crop} • {zone.area}</p>
-                                    <div className="mt-2 text-xl font-semibold text-emerald-600 dark:text-emerald-400">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <h4 className="font-bold text-gray-900 dark:text-white group-hover:text-primary-600 transition-colors">{zone.name}</h4>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400">{zone.crop} • {zone.area}</p>
+                                        </div>
+                                        <div className="p-2 bg-primary-50 dark:bg-primary-900/20 rounded-lg text-primary-600 dark:text-primary-400">
+                                            <MapIcon size={20} />
+                                        </div>
+                                    </div>
+                                    <div className="mt-4 text-2xl font-bold text-primary-700 dark:text-primary-400">
                                         ₱{zone.total.toLocaleString()}
                                     </div>
                                 </div>
@@ -473,18 +491,21 @@ export const Dashboard = () => {
                     />
 
                     {/* Mini Map */}
-                    <div className="mt-6 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="font-bold text-gray-900 dark:text-white">Farm Map</h3>
+                    <div className="mt-6 card p-0 overflow-hidden border-0 shadow-sm">
+                        <div className="p-4 flex items-center justify-between border-b border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800">
+                            <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                <MapIcon size={18} className="text-primary-500" />
+                                Farm Map
+                            </h3>
                             <button
                                 onClick={() => setIsMapModalOpen(true)}
-                                className="text-sm text-emerald-600 hover:text-emerald-700 font-medium"
+                                className="text-sm text-primary-600 hover:text-primary-700 font-medium hover:underline"
                             >
                                 Expand
                             </button>
                         </div>
                         <div
-                            className="h-80 rounded-lg overflow-hidden relative cursor-pointer group"
+                            className="h-64 relative cursor-pointer group"
                             onClick={() => setIsMapModalOpen(true)}
                         >
                             <MapComponent
@@ -518,8 +539,8 @@ export const Dashboard = () => {
                                 }}
                             />
                             {/* Overlay */}
-                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center pointer-events-none">
-                                <span className="opacity-0 group-hover:opacity-100 bg-white/90 text-gray-800 px-3 py-1 rounded-full text-sm font-medium shadow-sm transition-opacity">
+                            <div className="absolute inset-0 bg-primary-900/0 group-hover:bg-primary-900/10 transition-colors flex items-center justify-center pointer-events-none">
+                                <span className="opacity-0 group-hover:opacity-100 bg-white text-primary-900 px-4 py-2 rounded-full text-sm font-bold shadow-lg transform scale-90 group-hover:scale-100 transition-all">
                                     Click to Expand
                                 </span>
                             </div>
@@ -530,27 +551,37 @@ export const Dashboard = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Recent Activity */}
-                <div className="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors">
-                    <h3 className="font-bold text-gray-900 dark:text-white mb-4">Recent Activity</h3>
-                    <div className="space-y-4">
+                <div className="lg:col-span-2 card">
+                    <h3 className="font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+                        <span className="bg-primary-100 dark:bg-primary-900/30 p-1.5 rounded-lg text-primary-600 dark:text-primary-400">
+                            <DollarSign size={18} />
+                        </span>
+                        Recent Activity
+                    </h3>
+                    <div className="space-y-3">
                         {expenses.slice(0, 5).map(expense => (
-                            <div key={expense.id} className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-colors">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 font-bold">
+                            <div key={expense.id} className="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-colors border border-transparent hover:border-gray-100 dark:hover:border-gray-700 group">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-10 h-10 rounded-full bg-primary-50 dark:bg-primary-900/30 flex items-center justify-center text-primary-600 dark:text-primary-400 font-bold group-hover:bg-primary-100 transition-colors">
                                         ₱
                                     </div>
                                     <div>
-                                        <p className="font-medium text-gray-900 dark:text-white">{expense.description || expense.category}</p>
+                                        <p className="font-semibold text-gray-900 dark:text-white group-hover:text-primary-700 transition-colors">{expense.description || expense.category}</p>
                                         <p className="text-xs text-gray-500 dark:text-gray-400">{new Date(expense.date).toLocaleDateString()}</p>
                                     </div>
                                 </div>
-                                <span className="font-semibold text-gray-900 dark:text-white">
+                                <span className="font-bold text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 px-3 py-1 rounded-lg border border-gray-100 dark:border-gray-700">
                                     ₱{Number(expense.amount).toLocaleString()}
                                 </span>
                             </div>
                         ))}
                         {expenses.length === 0 && (
-                            <p className="text-gray-500 text-center py-4">No recent activity.</p>
+                            <div className="text-center py-8">
+                                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 mb-3">
+                                    <DollarSign size={24} />
+                                </div>
+                                <p className="text-gray-500">No recent activity.</p>
+                            </div>
                         )}
                     </div>
                 </div>
@@ -748,7 +779,7 @@ const EndCycleModal = ({ isOpen, onClose, cycle }) => {
                             name="netAmount"
                             value={formData.netAmount}
                             onChange={handleChange}
-                            className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 font-bold text-emerald-600"
+                            className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 font-bold text-primary-600"
                             placeholder="Total Earnings"
                             required
                         />
@@ -766,7 +797,7 @@ const EndCycleModal = ({ isOpen, onClose, cycle }) => {
                             className="hidden"
                             id="milling-receipts"
                         />
-                        <label htmlFor="milling-receipts" className="cursor-pointer flex flex-col items-center gap-2 text-gray-500 hover:text-emerald-600 transition-colors">
+                        <label htmlFor="milling-receipts" className="cursor-pointer flex flex-col items-center gap-2 text-gray-500 hover:text-primary-600 transition-colors">
                             <span className="bg-gray-100 dark:bg-gray-700 p-3 rounded-full">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /><circle cx="9" cy="9" r="2" /><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" /></svg>
                             </span>

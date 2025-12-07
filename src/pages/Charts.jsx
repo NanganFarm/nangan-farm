@@ -5,7 +5,7 @@ import { api } from '../services/api';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, AreaChart, Area, ResponsiveContainer } from 'recharts';
 import { format, parseISO, startOfMonth } from 'date-fns';
 
-const COLORS = ['#059669', '#10B981', '#34D399', '#6EE7B7', '#A7F3D0', '#D1FAE5'];
+const COLORS = ['#14b8a6', '#0d9488', '#0f766e', '#115e59', '#a3e635', '#84cc16'];
 
 export const Charts = () => {
     const { currentFarm, currentCycle } = useFarm();
@@ -116,7 +116,7 @@ export const Charts = () => {
                                         formatter={(value) => `₱${value.toLocaleString()}`}
                                         contentStyle={{ backgroundColor: theme === 'dark' ? '#1f2937' : '#fff', borderColor: theme === 'dark' ? '#374151' : '#e5e7eb', color: theme === 'dark' ? '#fff' : '#000' }}
                                     />
-                                    <Bar dataKey="value" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+                                    <Bar dataKey="value" fill="#14b8a6" radius={[4, 4, 0, 0]} />
                                 </BarChart>
                             </ResponsiveContainer>
                         </div>
@@ -162,7 +162,7 @@ export const Charts = () => {
                                     formatter={(value) => `₱${value.toLocaleString()}`}
                                     contentStyle={{ backgroundColor: theme === 'dark' ? '#1f2937' : '#fff', borderColor: theme === 'dark' ? '#374151' : '#e5e7eb', color: theme === 'dark' ? '#fff' : '#000' }}
                                 />
-                                <Bar dataKey="value" fill="#10B981" radius={[4, 4, 0, 0]} />
+                                <Bar dataKey="value" fill="#14b8a6" radius={[4, 4, 0, 0]} />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
@@ -176,8 +176,8 @@ export const Charts = () => {
                             <AreaChart data={monthlyData}>
                                 <defs>
                                     <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#10B981" stopOpacity={0.8} />
-                                        <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
+                                        <stop offset="5%" stopColor="#14b8a6" stopOpacity={0.8} />
+                                        <stop offset="95%" stopColor="#14b8a6" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
 
@@ -188,7 +188,7 @@ export const Charts = () => {
                                     formatter={(value) => `₱${value.toLocaleString()}`}
                                     contentStyle={{ backgroundColor: theme === 'dark' ? '#1f2937' : '#fff', borderColor: theme === 'dark' ? '#374151' : '#e5e7eb', color: theme === 'dark' ? '#fff' : '#000' }}
                                 />
-                                <Area type="monotone" dataKey="value" stroke="#10B981" fillOpacity={1} fill="url(#colorValue)" />
+                                <Area type="monotone" dataKey="value" stroke="#14b8a6" fillOpacity={1} fill="url(#colorValue)" />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>

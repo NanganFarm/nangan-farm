@@ -87,11 +87,11 @@ export const WeatherWidget = ({ coordinates, farmName }) => {
 
     const getWeatherIcon = (code) => {
         // WMO Weather interpretation codes (https://open-meteo.com/en/docs)
-        if (code === 0) return <Sun className="text-yellow-500" />;
+        if (code === 0) return <Sun className="text-amber-400" />;
         if (code >= 1 && code <= 3) return <Cloud className="text-gray-400" />;
-        if (code >= 51 && code <= 67) return <CloudRain className="text-blue-400" />; // Drizzle/Rain
-        if (code >= 80 && code <= 82) return <CloudRain className="text-blue-600" />; // Showers
-        if (code >= 95) return <Wind className="text-purple-500" />; // Thunderstorm
+        if (code >= 51 && code <= 67) return <CloudRain className="text-sky-400" />; // Drizzle/Rain
+        if (code >= 80 && code <= 82) return <CloudRain className="text-sky-600" />; // Showers
+        if (code >= 95) return <Wind className="text-indigo-500" />; // Thunderstorm
         return <Cloud className="text-gray-400" />;
     };
 
@@ -122,10 +122,10 @@ export const WeatherWidget = ({ coordinates, farmName }) => {
     const daily = weather.daily;
 
     return (
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-6 rounded-xl shadow-lg">
+        <div className="bg-gradient-to-br from-primary-600 to-primary-800 text-white p-6 rounded-xl shadow-lg">
             <div className="flex justify-between items-start mb-6">
                 <div>
-                    <div className="flex items-center gap-2 text-blue-100 mb-1">
+                    <div className="flex items-center gap-2 text-primary-100 mb-1">
                         <MapPin size={16} />
                         <span className="text-sm font-medium">{locationName}</span>
                     </div>
@@ -133,7 +133,7 @@ export const WeatherWidget = ({ coordinates, farmName }) => {
                         <span className="text-5xl font-bold">{Math.round(current.temperature_2m)}°</span>
                         <div>
                             <div className="text-lg font-semibold">{getWeatherDescription(current.weather_code)}</div>
-                            <div className="text-blue-100 text-sm">
+                            <div className="text-primary-100 text-sm">
                                 H: {Math.round(daily.temperature_2m_max[0])}° L: {Math.round(daily.temperature_2m_min[0])}°
                             </div>
                         </div>
@@ -146,19 +146,19 @@ export const WeatherWidget = ({ coordinates, farmName }) => {
 
             <div className="grid grid-cols-3 gap-4 mb-6">
                 <div className="bg-white/10 rounded-lg p-3 backdrop-blur-sm">
-                    <div className="flex items-center gap-2 text-blue-100 text-xs mb-1">
+                    <div className="flex items-center gap-2 text-primary-100 text-xs mb-1">
                         <Wind size={14} /> Wind
                     </div>
                     <div className="font-semibold">{current.wind_speed_10m} km/h</div>
                 </div>
                 <div className="bg-white/10 rounded-lg p-3 backdrop-blur-sm">
-                    <div className="flex items-center gap-2 text-blue-100 text-xs mb-1">
+                    <div className="flex items-center gap-2 text-primary-100 text-xs mb-1">
                         <Droplets size={14} /> Humidity
                     </div>
                     <div className="font-semibold">{current.relative_humidity_2m}%</div>
                 </div>
                 <div className="bg-white/10 rounded-lg p-3 backdrop-blur-sm">
-                    <div className="flex items-center gap-2 text-blue-100 text-xs mb-1">
+                    <div className="flex items-center gap-2 text-primary-100 text-xs mb-1">
                         <CloudRain size={14} /> Rain
                     </div>
                     <div className="font-semibold">{current.precipitation} mm</div>
@@ -169,7 +169,7 @@ export const WeatherWidget = ({ coordinates, farmName }) => {
                 <div className="grid grid-cols-5 gap-2 text-center">
                     {daily.time.slice(1, 6).map((date, i) => (
                         <div key={date} className="flex flex-col items-center gap-1">
-                            <span className="text-xs text-blue-100">
+                            <span className="text-xs text-primary-100">
                                 {new Date(date).toLocaleDateString('en-US', { weekday: 'short' })}
                             </span>
                             <div className="my-1 scale-75">

@@ -64,7 +64,7 @@ export const CreatableSelect = ({
         <div className={clsx("relative", className)} ref={wrapperRef}>
             {/* Trigger / Input Display */}
             <div
-                className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 flex items-center justify-between cursor-pointer focus-within:ring-2 focus-within:ring-emerald-500/20 focus-within:border-emerald-500"
+                className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 flex items-center justify-between cursor-pointer focus-within:ring-2 focus-within:ring-primary-500/20 focus-within:border-primary-500"
                 onClick={() => {
                     setIsOpen(true);
                     setTimeout(() => inputRef.current?.focus(), 0);
@@ -84,7 +84,7 @@ export const CreatableSelect = ({
                         <input
                             ref={inputRef}
                             type="text"
-                            className="w-full px-2 py-1 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:text-white"
+                            className="w-full px-2 py-1 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 dark:text-white"
                             placeholder="Type to search..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
@@ -111,7 +111,7 @@ export const CreatableSelect = ({
                                 onClick={() => handleSelect(option)}
                                 className={clsx(
                                     "px-4 py-2 text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-between",
-                                    value === option.value ? "text-emerald-600 font-medium bg-emerald-50 dark:bg-emerald-900/20" : "text-gray-700 dark:text-gray-300"
+                                    value === option.value ? "text-primary-600 font-medium bg-primary-50 dark:bg-primary-900/20" : "text-gray-700 dark:text-gray-300"
                                 )}
                             >
                                 {option.label}
@@ -123,7 +123,7 @@ export const CreatableSelect = ({
                         {searchTerm && !exactMatch && (
                             <div
                                 onClick={handleCreate}
-                                className="px-4 py-2 text-sm cursor-pointer hover:bg-emerald-50 dark:hover:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 flex items-center gap-2 border-t border-gray-100 dark:border-gray-700"
+                                className="px-4 py-2 text-sm cursor-pointer hover:bg-primary-50 dark:hover:bg-primary-900/20 text-primary-600 dark:text-primary-400 flex items-center gap-2 border-t border-gray-100 dark:border-gray-700"
                             >
                                 <Plus size={14} />
                                 {isCreating ? "Creating..." : `Create "${searchTerm}"`}

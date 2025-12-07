@@ -5,7 +5,7 @@ import { api } from '../services/api';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, AreaChart, Area, ResponsiveContainer, ComposedChart, Line } from 'recharts';
 import { format, parseISO, startOfMonth } from 'date-fns';
 
-const COLORS = ['#059669', '#10B981', '#34D399', '#6EE7B7', '#A7F3D0', '#D1FAE5'];
+const COLORS = ['#14b8a6', '#0d9488', '#0f766e', '#115e59', '#a3e635', '#84cc16'];
 
 const ChartContainer = ({ children, height = 300, className = "" }) => {
     const [visible, setVisible] = useState(false);
@@ -160,47 +160,47 @@ export const Analytics = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
                 {/* Profitability Chart */}
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 lg:col-span-2 transition-colors min-w-0">
+                <div className="card lg:col-span-2 min-w-0">
                     <h3 className="font-bold text-gray-900 dark:text-white mb-6">Profitability by Cycle</h3>
                     <ChartContainer height={400}>
                         <ResponsiveContainer width="100%" height="100%">
                             <ComposedChart data={profitabilityData}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme === 'dark' ? '#374151' : '#e5e7eb'} />
-                                <XAxis dataKey="name" stroke={theme === 'dark' ? '#9ca3af' : '#6b7280'} />
-                                <YAxis stroke={theme === 'dark' ? '#9ca3af' : '#6b7280'} />
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme === 'dark' ? '#334155' : '#e2e8f0'} />
+                                <XAxis dataKey="name" stroke={theme === 'dark' ? '#94a3b8' : '#64748b'} />
+                                <YAxis stroke={theme === 'dark' ? '#94a3b8' : '#64748b'} />
                                 <Tooltip
                                     formatter={(value) => `₱${value.toLocaleString()}`}
-                                    contentStyle={{ backgroundColor: theme === 'dark' ? '#1f2937' : '#fff', borderColor: theme === 'dark' ? '#374151' : '#e5e7eb', color: theme === 'dark' ? '#fff' : '#000' }}
+                                    contentStyle={{ backgroundColor: theme === 'dark' ? '#0f172a' : '#fff', borderColor: theme === 'dark' ? '#1e293b' : '#e2e8f0', color: theme === 'dark' ? '#fff' : '#000' }}
                                 />
                                 <Legend />
-                                <Bar dataKey="revenue" name="Revenue" fill="#10B981" radius={[4, 4, 0, 0]} />
-                                <Bar dataKey="expenses" name="Expenses" fill="#EF4444" radius={[4, 4, 0, 0]} />
-                                <Line type="monotone" dataKey="profit" name="Net Profit" stroke="#3B82F6" strokeWidth={3} dot={{ r: 6 }} />
+                                <Bar dataKey="revenue" name="Revenue" fill="#14b8a6" radius={[4, 4, 0, 0]} />
+                                <Bar dataKey="expenses" name="Expenses" fill="#ef4444" radius={[4, 4, 0, 0]} />
+                                <Line type="monotone" dataKey="profit" name="Net Profit" stroke="#84cc16" strokeWidth={3} dot={{ r: 6 }} />
                             </ComposedChart>
                         </ResponsiveContainer>
                     </ChartContainer>
                 </div>
 
                 {/* Yield per Zone */}
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors min-w-0">
+                <div className="card min-w-0">
                     <h3 className="font-bold text-gray-900 dark:text-white mb-6">Avg. Yield per Zone (LKG/Ha)</h3>
                     <ChartContainer height={300}>
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={yieldData}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme === 'dark' ? '#374151' : '#e5e7eb'} />
-                                <XAxis dataKey="name" stroke={theme === 'dark' ? '#9ca3af' : '#6b7280'} />
-                                <YAxis stroke={theme === 'dark' ? '#9ca3af' : '#6b7280'} />
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme === 'dark' ? '#334155' : '#e2e8f0'} />
+                                <XAxis dataKey="name" stroke={theme === 'dark' ? '#94a3b8' : '#64748b'} />
+                                <YAxis stroke={theme === 'dark' ? '#94a3b8' : '#64748b'} />
                                 <Tooltip
-                                    contentStyle={{ backgroundColor: theme === 'dark' ? '#1f2937' : '#fff', borderColor: theme === 'dark' ? '#374151' : '#e5e7eb', color: theme === 'dark' ? '#fff' : '#000' }}
+                                    contentStyle={{ backgroundColor: theme === 'dark' ? '#0f172a' : '#fff', borderColor: theme === 'dark' ? '#1e293b' : '#e2e8f0', color: theme === 'dark' ? '#fff' : '#000' }}
                                 />
-                                <Bar dataKey="yield" name="LKG/Ha" fill="#F59E0B" radius={[4, 4, 0, 0]} />
+                                <Bar dataKey="yield" name="LKG/Ha" fill="#a3e635" radius={[4, 4, 0, 0]} />
                             </BarChart>
                         </ResponsiveContainer>
                     </ChartContainer>
                 </div>
 
                 {/* Category Pie Chart */}
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors min-w-0">
+                <div className="card min-w-0">
                     <h3 className="font-bold text-gray-900 dark:text-white mb-6">Expenses by Category</h3>
                     <ChartContainer height={300}>
                         <ResponsiveContainer width="100%" height="100%">
@@ -226,26 +226,26 @@ export const Analytics = () => {
                 </div>
 
                 {/* Monthly Trend Area Chart */}
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 lg:col-span-2 transition-colors min-w-0">
+                <div className="card lg:col-span-2 min-w-0">
                     <h3 className="font-bold text-gray-900 dark:text-white mb-6">Monthly Spending Trend</h3>
                     <ChartContainer height={300}>
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={monthlyData}>
                                 <defs>
                                     <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#10B981" stopOpacity={0.8} />
-                                        <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
+                                        <stop offset="5%" stopColor="#14b8a6" stopOpacity={0.8} />
+                                        <stop offset="95%" stopColor="#14b8a6" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
 
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme === 'dark' ? '#374151' : '#e5e7eb'} />
-                                <XAxis dataKey="name" stroke={theme === 'dark' ? '#9ca3af' : '#6b7280'} />
-                                <YAxis stroke={theme === 'dark' ? '#9ca3af' : '#6b7280'} />
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme === 'dark' ? '#334155' : '#e2e8f0'} />
+                                <XAxis dataKey="name" stroke={theme === 'dark' ? '#94a3b8' : '#64748b'} />
+                                <YAxis stroke={theme === 'dark' ? '#94a3b8' : '#64748b'} />
                                 <Tooltip
                                     formatter={(value) => `₱${value.toLocaleString()}`}
-                                    contentStyle={{ backgroundColor: theme === 'dark' ? '#1f2937' : '#fff', borderColor: theme === 'dark' ? '#374151' : '#e5e7eb', color: theme === 'dark' ? '#fff' : '#000' }}
+                                    contentStyle={{ backgroundColor: theme === 'dark' ? '#0f172a' : '#fff', borderColor: theme === 'dark' ? '#1e293b' : '#e2e8f0', color: theme === 'dark' ? '#fff' : '#000' }}
                                 />
-                                <Area type="monotone" dataKey="value" stroke="#10B981" fillOpacity={1} fill="url(#colorValue)" />
+                                <Area type="monotone" dataKey="value" stroke="#14b8a6" fillOpacity={1} fill="url(#colorValue)" />
                             </AreaChart>
                         </ResponsiveContainer>
                     </ChartContainer>

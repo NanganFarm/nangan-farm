@@ -32,11 +32,11 @@ export const Signup = () => {
     }
 
     return (
-        <div className="min-h-screen bg-emerald-900 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-primary-900 flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
                 <div className="p-8">
-                    <div className="flex justify-center mb-6 text-emerald-800">
-                        <div className="bg-emerald-100 p-3 rounded-full">
+                    <div className="flex justify-center mb-6 text-primary-800">
+                        <div className="bg-primary-100 p-3 rounded-full">
                             <UserPlus size={40} />
                         </div>
                     </div>
@@ -55,7 +55,7 @@ export const Signup = () => {
                                 <input
                                     type="email"
                                     required
-                                    className="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors"
+                                    className="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-colors"
                                     placeholder="you@example.com"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
@@ -72,7 +72,7 @@ export const Signup = () => {
                                 <input
                                     type="password"
                                     required
-                                    className="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors"
+                                    className="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-colors"
                                     placeholder="••••••••"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
@@ -89,7 +89,7 @@ export const Signup = () => {
                                 <input
                                     type="password"
                                     required
-                                    className="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors"
+                                    className="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-colors"
                                     placeholder="••••••••"
                                     value={passwordConfirm}
                                     onChange={(e) => setPasswordConfirm(e.target.value)}
@@ -100,14 +100,14 @@ export const Signup = () => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full bg-emerald-600 text-white py-3 rounded-lg font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-50"
+                            className="w-full bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50"
                         >
                             {loading ? 'Creating Account...' : 'Sign Up'}
                         </button>
                     </form>
 
                     <div className="mt-6 text-center text-sm text-gray-600">
-                        Already have an account? <Link to="/login" className="text-emerald-600 hover:underline font-medium">Log In</Link>
+                        Already have an account? <Link to="/login" className="text-primary-600 hover:underline font-medium">Log In</Link>
                     </div>
                 </div>
             </div>

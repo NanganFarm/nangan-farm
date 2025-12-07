@@ -114,9 +114,9 @@ const MapComponent = ({
     };
 
     return (
-        <div className={`h-[500px] w-full rounded-xl overflow-hidden shadow-lg border border-gray-200 dark:border-gray-700 z-0 relative ${isSelectingLocation ? 'cursor-crosshair ring-4 ring-emerald-500/50' : ''}`}>
+        <div className={`h-[500px] w-full rounded-xl overflow-hidden shadow-lg border border-gray-200 dark:border-gray-700 z-0 relative ${isSelectingLocation ? 'cursor-crosshair ring-4 ring-primary-500/50' : ''}`}>
             {isSelectingLocation && (
-                <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-[1000] bg-emerald-600 text-white px-4 py-2 rounded-full shadow-lg font-bold animate-pulse pointer-events-none">
+                <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-[1000] bg-primary-600 text-white px-4 py-2 rounded-full shadow-lg font-bold animate-pulse pointer-events-none">
                     Click on the map to set Farm Location
                 </div>
             )}
@@ -154,7 +154,7 @@ const MapComponent = ({
                                     message: '<strong>Oh snap!<strong> you can\'t draw that!'
                                 },
                                 shapeOptions: {
-                                    color: '#10b981' // Emerald-500
+                                    color: '#14b8a6' // Primary-500
                                 },
                                 snapDistance: 5
                             }
@@ -212,7 +212,7 @@ const MapComponent = ({
                         <Polygon
                             key={zone.id}
                             positions={validCoords}
-                            pathOptions={{ color: '#10b981', fillColor: '#10b981', fillOpacity: 0.4 }}
+                            pathOptions={{ color: '#14b8a6', fillColor: '#14b8a6', fillOpacity: 0.4 }}
                             eventHandlers={{
                                 dblclick: (e) => {
                                     L.DomEvent.stopPropagation(e);
@@ -223,7 +223,7 @@ const MapComponent = ({
                             <Tooltip
                                 permanent
                                 direction="center"
-                                className="!bg-white/90 !backdrop-blur-sm !text-emerald-900 !px-4 !py-1 !rounded-full !shadow-xl !border-0 !font-bold !text-sm !tracking-wide"
+                                className="!bg-white/90 !backdrop-blur-sm !text-primary-900 !px-4 !py-1 !rounded-full !shadow-xl !border-0 !font-bold !text-sm !tracking-wide"
                                 opacity={1}
                             >
                                 {zone.name}

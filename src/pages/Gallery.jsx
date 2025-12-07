@@ -102,7 +102,7 @@ export const Gallery = () => {
                             </div>
                             <div className="p-3">
                                 <h4 className="font-medium text-gray-900 dark:text-white truncate">{img.title}</h4>
-                                <p className="text-sm text-emerald-600 font-medium mb-2">{img.subtitle}</p>
+                                <p className="text-sm text-primary-600 font-medium mb-2">{img.subtitle}</p>
                                 <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                                     <span className="flex items-center gap-1">
                                         <Calendar size={12} /> {img.date}

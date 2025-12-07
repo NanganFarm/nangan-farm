@@ -87,7 +87,7 @@ export const CycleHistory = () => {
                         <select
                             value={selectedZoneId}
                             onChange={(e) => setSelectedZoneId(e.target.value)}
-                            className="w-full p-2 border rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none"
+                            className="w-full p-2 border rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-2 focus:ring-primary-500 outline-none"
                         >
                             <option value="all">All Zones</option>
                             {zones.map(zone => (
@@ -118,8 +118,8 @@ export const CycleHistory = () => {
                                         <span className={clsx(
                                             "text-xs px-2 py-0.5 rounded-full font-medium border",
                                             cycle.type === 'ratoon'
-                                                ? "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800"
-                                                : "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800"
+                                                ? "bg-accent-50 text-accent-700 border-accent-200 dark:bg-accent-900/30 dark:text-accent-400 dark:border-accent-800"
+                                                : "bg-primary-50 text-primary-700 border-primary-200 dark:bg-primary-900/30 dark:text-primary-400 dark:border-primary-800"
                                         )}>
                                             {cycle.type === 'ratoon' ? 'Ratoon' : 'New Plant'}
                                         </span>
@@ -146,7 +146,7 @@ export const CycleHistory = () => {
                                     <>
                                         <div>
                                             <p className="text-xs text-gray-500 mb-1">Net Income</p>
-                                            <p className="text-xl font-bold text-emerald-600">₱{Number(cycle.milling.netAmount).toLocaleString()}</p>
+                                            <p className="text-xl font-bold text-primary-600">₱{Number(cycle.milling.netAmount).toLocaleString()}</p>
                                         </div>
                                         <div>
                                             <p className="text-xs text-gray-500 mb-1">Gross Income</p>
@@ -176,12 +176,12 @@ export const CycleHistory = () => {
                             {cycle.stageHistory && cycle.stageHistory.length > 0 && (
                                 <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700">
                                     <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                                        <Calendar size={14} className="text-emerald-500" /> Stage Timeline
+                                        <Calendar size={14} className="text-primary-500" /> Stage Timeline
                                     </h4>
                                     <div className="relative pl-4 border-l-2 border-gray-200 dark:border-gray-700 space-y-6 ml-2">
                                         {cycle.stageHistory.map((history, index) => (
                                             <div key={history.id} className="relative">
-                                                <div className="absolute -left-[21px] top-1.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white dark:border-gray-800 ring-1 ring-emerald-100 dark:ring-emerald-900"></div>
+                                                <div className="absolute -left-[21px] top-1.5 w-3 h-3 rounded-full bg-primary-500 border-2 border-white dark:border-gray-800 ring-1 ring-primary-100 dark:ring-primary-900"></div>
                                                 <div>
                                                     <p className="text-sm font-medium text-gray-900 dark:text-white">{history.stageName}</p>
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">

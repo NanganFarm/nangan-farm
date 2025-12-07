@@ -139,7 +139,7 @@ export const Zones = () => {
                     {viewMode === 'map' && (
                         <button
                             onClick={() => setIsSelectingLocation(!isSelectingLocation)}
-                            className={`btn ${isSelectingLocation ? 'bg-amber-500 hover:bg-amber-600 text-white' : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600'} shadow-sm`}
+                            className={`btn ${isSelectingLocation ? 'bg-accent-500 hover:bg-accent-600 text-white' : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600'} shadow-sm`}
                         >
                             <MapPin size={18} className="mr-2" />
                             {isSelectingLocation ? 'Cancel Selection' : 'Set Farm Location'}
@@ -148,14 +148,14 @@ export const Zones = () => {
                     <div className="bg-gray-100 dark:bg-gray-700 p-1 rounded-lg flex">
                         <button
                             onClick={() => setViewMode('list')}
-                            className={`p-2 rounded-md transition-colors ${viewMode === 'list' ? 'bg-white dark:bg-gray-600 shadow-sm text-emerald-600' : 'text-gray-500 dark:text-gray-400'}`}
+                            className={`p-2 rounded-md transition-colors ${viewMode === 'list' ? 'bg-white dark:bg-gray-600 shadow-sm text-primary-600' : 'text-gray-500 dark:text-gray-400'}`}
                             title="List View"
                         >
                             <List size={20} />
                         </button>
                         <button
                             onClick={() => setViewMode('map')}
-                            className={`p-2 rounded-md transition-colors ${viewMode === 'map' ? 'bg-white dark:bg-gray-600 shadow-sm text-emerald-600' : 'text-gray-500 dark:text-gray-400'}`}
+                            className={`p-2 rounded-md transition-colors ${viewMode === 'map' ? 'bg-white dark:bg-gray-600 shadow-sm text-primary-600' : 'text-gray-500 dark:text-gray-400'}`}
                             title="Map View"
                         >
                             <MapIcon size={20} />
@@ -163,7 +163,7 @@ export const Zones = () => {
                     </div>
                     <button
                         onClick={openAddModal}
-                        className="btn btn-primary shadow-lg shadow-emerald-900/20"
+                        className="btn btn-primary shadow-lg shadow-primary-900/20"
                     >
                         <Plus size={18} />
                         Add Zone
@@ -174,12 +174,12 @@ export const Zones = () => {
             {viewMode === 'map' ? (
                 <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
                     {drawingForZone ? (
-                        <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 rounded-lg text-sm flex items-center gap-2 animate-pulse">
+                        <div className="mb-4 p-3 bg-accent-50 dark:bg-accent-900/20 text-accent-700 dark:text-accent-300 rounded-lg text-sm flex items-center gap-2 animate-pulse border border-accent-200 dark:border-accent-800">
                             <Pencil size={18} />
                             <strong>Drawing mode:</strong> Draw the boundary for <u>{drawingForZone.name}</u>. The form will re-open when you finish.
                         </div>
                     ) : (
-                        <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg text-sm flex items-start gap-2">
+                        <div className="mb-4 p-3 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 rounded-lg text-sm flex items-start gap-2 border border-primary-100 dark:border-primary-800">
                             <MapIcon size={18} className="mt-0.5 shrink-0" />
                             <div>
                                 <strong>Interactive Map:</strong>
@@ -218,22 +218,22 @@ export const Zones = () => {
                         <div className="col-span-full text-center py-12 bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">
                             <MapPin size={48} className="mx-auto text-gray-300 dark:text-gray-600 mb-3" />
                             <p className="text-gray-500 dark:text-gray-400">No zones added yet.</p>
-                            <button onClick={openAddModal} className="text-emerald-600 font-medium mt-2 hover:underline">Create your first zone</button>
+                            <button onClick={openAddModal} className="text-primary-600 font-medium mt-2 hover:underline">Create your first zone</button>
                         </div>
                     ) : (
                         zones.map(zone => (
-                            <div key={zone.id} className="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow group relative">
+                            <div key={zone.id} className="card group relative hover:shadow-md transition-all duration-300">
                                 <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button
                                         onClick={() => openEditModal(zone)}
-                                        className="text-gray-400 hover:text-emerald-500"
+                                        className="text-gray-400 hover:text-primary-500 bg-white dark:bg-gray-800 p-1 rounded-md shadow-sm"
                                         title="Edit Zone"
                                     >
                                         <Pencil size={16} />
                                     </button>
                                     <button
                                         onClick={() => handleDelete(zone.id)}
-                                        className="text-gray-400 hover:text-red-500"
+                                        className="text-gray-400 hover:text-red-500 bg-white dark:bg-gray-800 p-1 rounded-md shadow-sm"
                                         title="Delete Zone"
                                     >
                                         <Trash2 size={16} />
@@ -241,7 +241,7 @@ export const Zones = () => {
                                 </div>
 
                                 <h3
-                                    className="font-bold text-lg text-gray-900 dark:text-white mb-3 pr-16 cursor-pointer hover:text-emerald-600 transition-colors"
+                                    className="font-bold text-lg text-gray-900 dark:text-white mb-3 pr-16 cursor-pointer hover:text-primary-600 transition-colors"
                                     onDoubleClick={() => handleEnterZone(zone)}
                                     title="Double click to manage zone"
                                 >
@@ -250,18 +250,18 @@ export const Zones = () => {
 
                                 <div className="space-y-2 text-sm">
                                     <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-                                        <Ruler size={16} className="text-emerald-500" />
+                                        <Ruler size={16} className="text-primary-500" />
                                         <span>{zone.area}</span>
                                     </div>
                                     {zone.crop && (
                                         <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-                                            <Sprout size={16} className="text-emerald-500" />
+                                            <Sprout size={16} className="text-primary-500" />
                                             <span>{zone.crop}</span>
                                         </div>
                                     )}
                                     {zone.location && (
                                         <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-                                            <MapPin size={16} className="text-emerald-500" />
+                                            <MapPin size={16} className="text-primary-500" />
                                             <span>{zone.location}</span>
                                         </div>
                                     )}
@@ -269,7 +269,7 @@ export const Zones = () => {
 
                                 <button
                                     onClick={() => handleEnterZone(zone)}
-                                    className="w-full mt-4 flex items-center justify-center gap-2 bg-emerald-50 text-emerald-700 py-2 rounded-lg hover:bg-emerald-100 transition-colors font-medium"
+                                    className="w-full mt-4 flex items-center justify-center gap-2 bg-primary-50 text-primary-700 py-2 rounded-lg hover:bg-primary-100 transition-colors font-medium dark:bg-primary-900/20 dark:text-primary-300 dark:hover:bg-primary-900/30"
                                 >
                                     Manage Zone <ArrowRight size={16} />
                                 </button>
@@ -286,7 +286,7 @@ export const Zones = () => {
             >
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {formData.coordinates ? (
-                        <div className="p-3 bg-emerald-50 text-emerald-700 text-sm rounded-lg border border-emerald-200 flex items-center justify-between gap-2">
+                        <div className="p-3 bg-primary-50 text-primary-700 text-sm rounded-lg border border-primary-200 flex items-center justify-between gap-2 dark:bg-primary-900/20 dark:text-primary-300 dark:border-primary-800">
                             <div className="flex items-center gap-2">
                                 <MapPin size={16} />
                                 <span>Location coordinates captured!</span>
@@ -294,14 +294,14 @@ export const Zones = () => {
                             <button
                                 type="button"
                                 onClick={handleDrawOnMap}
-                                className="text-emerald-700 font-medium hover:underline text-xs"
+                                className="text-primary-700 font-medium hover:underline text-xs dark:text-primary-400"
                             >
                                 Redraw
                             </button>
                         </div>
                     ) : (
                         editingZone && (
-                            <div className="p-3 bg-gray-50 text-gray-600 text-sm rounded-lg border border-gray-200 flex items-center justify-between gap-2">
+                            <div className="p-3 bg-gray-50 text-gray-600 text-sm rounded-lg border border-gray-200 flex items-center justify-between gap-2 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600">
                                 <div className="flex items-center gap-2">
                                     <MapIcon size={16} />
                                     <span>No map boundary set.</span>
@@ -309,7 +309,7 @@ export const Zones = () => {
                                 <button
                                     type="button"
                                     onClick={handleDrawOnMap}
-                                    className="text-emerald-600 font-medium hover:underline text-xs"
+                                    className="text-primary-600 font-medium hover:underline text-xs dark:text-primary-400"
                                 >
                                     Draw on Map
                                 </button>
@@ -323,7 +323,7 @@ export const Zones = () => {
                             required
                             value={formData.name}
                             onChange={e => setFormData({ ...formData, name: e.target.value })}
-                            className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none dark:bg-gray-700 dark:text-white"
+                            className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none dark:bg-gray-700 dark:text-white transition-all"
                             placeholder="e.g., North Field"
                         />
                     </div>
@@ -334,7 +334,7 @@ export const Zones = () => {
                             required
                             value={formData.area}
                             onChange={e => setFormData({ ...formData, area: e.target.value })}
-                            className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none dark:bg-gray-700 dark:text-white"
+                            className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none dark:bg-gray-700 dark:text-white transition-all"
                             placeholder="e.g., 2 hectares"
                         />
                     </div>
@@ -344,7 +344,7 @@ export const Zones = () => {
                             type="text"
                             value={formData.crop}
                             onChange={e => setFormData({ ...formData, crop: e.target.value })}
-                            className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none dark:bg-gray-700 dark:text-white"
+                            className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none dark:bg-gray-700 dark:text-white transition-all"
                             placeholder="e.g., Sugarcane"
                         />
                     </div>
@@ -354,7 +354,7 @@ export const Zones = () => {
                             rows="2"
                             value={formData.location}
                             onChange={e => setFormData({ ...formData, location: e.target.value })}
-                            className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none resize-none dark:bg-gray-700 dark:text-white"
+                            className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none resize-none dark:bg-gray-700 dark:text-white transition-all"
                             placeholder="e.g., Near the river"
                         />
                     </div>
@@ -369,7 +369,7 @@ export const Zones = () => {
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="btn btn-primary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="btn btn-primary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary-900/20"
                         >
                             {isSubmitting ? (
                                 <>

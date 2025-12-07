@@ -339,8 +339,8 @@ export const Expenses = () => {
     const SortIcon = ({ columnKey }) => {
         if (sortConfig.key !== columnKey) return <ArrowUpDown size={14} className="text-gray-400" />;
         return sortConfig.direction === 'asc'
-            ? <ArrowUp size={14} className="text-emerald-600" />
-            : <ArrowDown size={14} className="text-emerald-600" />;
+            ? <ArrowUp size={14} className="text-primary-600" />
+            : <ArrowDown size={14} className="text-primary-600" />;
     };
 
     if (loading) return <div className="p-8 text-center text-gray-500">Loading expenses...</div>;
@@ -348,8 +348,8 @@ export const Expenses = () => {
     if (!currentFarm) {
         return (
             <div className="flex flex-col items-center justify-center h-[60vh] text-center p-8">
-                <div className="bg-emerald-100 p-4 rounded-full mb-4">
-                    <Filter size={48} className="text-emerald-600" />
+                <div className="bg-primary-50 p-6 rounded-full mb-6 shadow-sm">
+                    <Filter size={48} className="text-primary-600" />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">No Farm Selected</h2>
                 <p className="text-gray-500 max-w-md mb-6">
@@ -380,7 +380,7 @@ export const Expenses = () => {
                             });
                             setIsModalOpen(true);
                         }}
-                        className="btn btn-primary shadow-lg shadow-emerald-900/20"
+                        className="btn btn-primary shadow-lg shadow-primary-900/20"
                     >
                         <Plus size={18} />
                         Add Expense
@@ -397,14 +397,14 @@ export const Expenses = () => {
                         placeholder="Search expenses..."
                         value={filters.search}
                         onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                        className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 dark:bg-gray-900 dark:text-white"
+                        className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 dark:bg-gray-900 dark:text-white transition-all"
                     />
                 </div>
                 <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-hide w-full md:w-auto">
                     <select
                         value={filters.category}
                         onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value }))}
-                        className="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-white dark:bg-gray-900 dark:text-white min-w-[140px] flex-shrink-0"
+                        className="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 bg-white dark:bg-gray-900 dark:text-white min-w-[140px] flex-shrink-0 transition-all"
                     >
                         <option value="">All Categories</option>
                         {categories.map(c => (
@@ -415,7 +415,7 @@ export const Expenses = () => {
                         <select
                             value={filters.zone}
                             onChange={(e) => setFilters(prev => ({ ...prev, zone: e.target.value }))}
-                            className="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-white dark:bg-gray-900 dark:text-white min-w-[140px] flex-shrink-0"
+                            className="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 bg-white dark:bg-gray-900 dark:text-white min-w-[140px] flex-shrink-0 transition-all"
                         >
                             <option value="">All Zones</option>
                             {zones.map(z => (
@@ -427,20 +427,20 @@ export const Expenses = () => {
                         type="date"
                         value={filters.startDate}
                         onChange={(e) => setFilters(prev => ({ ...prev, startDate: e.target.value }))}
-                        className="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 dark:bg-gray-900 dark:text-white flex-shrink-0"
+                        className="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 dark:bg-gray-900 dark:text-white flex-shrink-0 transition-all"
                         placeholder="Start Date"
                     />
                     <input
                         type="date"
                         value={filters.endDate}
                         onChange={(e) => setFilters(prev => ({ ...prev, endDate: e.target.value }))}
-                        className="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 dark:bg-gray-900 dark:text-white flex-shrink-0"
+                        className="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 dark:bg-gray-900 dark:text-white flex-shrink-0 transition-all"
                         placeholder="End Date"
                     />
                     {(filters.search || filters.category || filters.zone || filters.startDate || filters.endDate) && (
                         <button
                             onClick={() => setFilters({ search: '', category: '', zone: '', startDate: '', endDate: '' })}
-                            className="px-4 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors whitespace-nowrap flex-shrink-0"
+                            className="px-4 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors whitespace-nowrap flex-shrink-0 font-medium"
                         >
                             Clear
                         </button>
@@ -456,24 +456,24 @@ export const Expenses = () => {
                     <div className="text-center py-8 text-gray-500">No expenses match your filters.</div>
                 ) : (
                     sortedAndFilteredExpenses.map((expense) => (
-                        <div key={expense.id} className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors">
+                        <div key={expense.id} className="card">
                             <div className="flex justify-between items-start mb-2 gap-3">
                                 <div className="min-w-0 flex-1">
                                     <p className="text-xs text-gray-500 dark:text-gray-400">{new Date(expense.date).toLocaleDateString()}</p>
                                     <h4 className="font-medium text-gray-900 dark:text-white mt-1 break-words">{expense.description || '-'}</h4>
                                 </div>
-                                <span className="font-bold text-emerald-700 dark:text-emerald-400 whitespace-nowrap flex-shrink-0">
+                                <span className="font-bold text-primary-700 dark:text-primary-400 whitespace-nowrap flex-shrink-0 bg-primary-50 dark:bg-primary-900/20 px-2 py-1 rounded-lg">
                                     ₱{Number(expense.amount).toLocaleString()}
                                 </span>
                             </div>
                             <div className="flex items-center gap-2 mb-3 flex-wrap">
-                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-300">
                                     {expense.category}
                                 </span>
                                 {!currentCycle && (
                                     <>
                                         <span className="text-xs text-gray-500 dark:text-gray-400">•</span>
-                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-accent-100 text-accent-800 dark:bg-accent-900/30 dark:text-accent-300">
                                             {getZoneName(expense)}
                                         </span>
                                     </>
@@ -484,7 +484,7 @@ export const Expenses = () => {
                             <div className="flex justify-end gap-2 pt-2 border-t border-gray-50 dark:border-gray-700">
                                 <button
                                     onClick={() => handleEdit(expense)}
-                                    className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors"
+                                    className="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
                                 >
                                     <Pencil size={16} />
                                 </button>
@@ -532,36 +532,36 @@ export const Expenses = () => {
                                 <tr><td colSpan="6" className="px-6 py-8 text-center text-gray-500">No expenses match your filters.</td></tr>
                             ) : (
                                 sortedAndFilteredExpenses.map((expense) => (
-                                    <tr key={expense.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors">
-                                        <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{new Date(expense.date).toLocaleDateString()}</td>
+                                    <tr key={expense.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors group">
+                                        <td className="px-6 py-4 text-gray-600 dark:text-gray-300 font-medium">{new Date(expense.date).toLocaleDateString()}</td>
                                         {!currentCycle && (
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-medium bg-accent-100 text-accent-800 dark:bg-accent-900/30 dark:text-accent-300">
                                                     {getZoneName(expense)}
                                                 </span>
                                             </td>
                                         )}
                                         <td className="px-6 py-4">
-                                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-emerald-100 text-emerald-800">
+                                            <span className="inline-flex items-center px-3 py-1 rounded-lg text-sm font-medium bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-300">
                                                 {expense.category}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{expense.description || '-'}</td>
                                         <td className="px-6 py-4 text-gray-500 dark:text-gray-400">{expense.stage}</td>
-                                        <td className="px-6 py-4 text-right font-semibold text-gray-900 dark:text-white">
+                                        <td className="px-6 py-4 text-right font-bold text-gray-900 dark:text-white">
                                             ₱{Number(expense.amount).toLocaleString()}
                                         </td>
-                                        <td className="px-6 py-4 text-center flex items-center justify-center gap-2">
+                                        <td className="px-6 py-4 text-center flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <button
                                                 onClick={() => handleEdit(expense)}
-                                                className="text-gray-400 hover:text-emerald-600 transition-colors"
+                                                className="text-gray-400 hover:text-primary-600 transition-colors p-1 hover:bg-primary-50 rounded"
                                                 title="Edit"
                                             >
                                                 <Pencil size={16} />
                                             </button>
                                             <button
                                                 onClick={() => handleDelete(expense.id)}
-                                                className="text-gray-400 hover:text-red-600 transition-colors"
+                                                className="text-gray-400 hover:text-red-600 transition-colors p-1 hover:bg-red-50 rounded"
                                                 title="Delete"
                                             >
                                                 <Trash2 size={16} />
@@ -594,7 +594,7 @@ export const Expenses = () => {
                             required
                             value={formData.date}
                             onChange={e => setFormData({ ...formData, date: e.target.value })}
-                            className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none dark:bg-gray-700 dark:text-white"
+                            className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none dark:bg-gray-700 dark:text-white transition-all"
                         />
                     </div>
 
@@ -603,7 +603,7 @@ export const Expenses = () => {
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Receipt Photo</label>
                         <div className="mt-1 flex items-center gap-4">
                             {receiptImage && (
-                                <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
+                                <div className="relative w-16 h-16 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-600 shadow-sm">
                                     <img src={receiptImage} alt="Receipt preview" className="w-full h-full object-cover" />
                                     <button
                                         type="button"
@@ -648,7 +648,7 @@ export const Expenses = () => {
                             placeholder="0.00"
                             value={formData.amount}
                             onChange={e => setFormData({ ...formData, amount: e.target.value })}
-                            className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none dark:bg-gray-700 dark:text-white"
+                            className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none dark:bg-gray-700 dark:text-white transition-all font-bold text-lg"
                         />
                     </div>
 
@@ -657,7 +657,7 @@ export const Expenses = () => {
                         <select
                             value={formData.stageId}
                             onChange={e => setFormData({ ...formData, stageId: e.target.value })}
-                            className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none bg-white dark:bg-gray-700 dark:text-white"
+                            className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none bg-white dark:bg-gray-700 dark:text-white transition-all"
                         >
                             <option value="">Select Stage (Optional)</option>
                             {stages.map(s => (
@@ -673,7 +673,7 @@ export const Expenses = () => {
                             placeholder="Details about this expense..."
                             value={formData.description}
                             onChange={e => setFormData({ ...formData, description: e.target.value })}
-                            className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none resize-none dark:bg-gray-700 dark:text-white"
+                            className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none resize-none dark:bg-gray-700 dark:text-white transition-all"
                         />
                     </div>
 
@@ -687,7 +687,7 @@ export const Expenses = () => {
                         </button>
                         <button
                             type="submit"
-                            className="btn btn-primary"
+                            className="btn btn-primary shadow-lg shadow-primary-900/20"
                         >
                             Save Expense
                         </button>
