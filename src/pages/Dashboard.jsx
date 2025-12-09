@@ -8,6 +8,8 @@ import clsx from 'clsx';
 import { Modal } from '../components/Modal';
 import { WeatherWidget } from '../components/WeatherWidget';
 import MapComponent from '../components/MapComponent';
+import { ndviApi } from '../services/ndviApi';
+import NDVIChart from '../components/NDVIChart';
 
 const StatCard = ({ title, value, icon: Icon, color }) => (
     <div className="card flex items-start justify-between group hover:shadow-md transition-all duration-200">
@@ -166,6 +168,89 @@ export const Dashboard = () => {
     const [isEndCycleModalOpen, setIsEndCycleModalOpen] = useState(false);
     const [isMapModalOpen, setIsMapModalOpen] = useState(false);
     const [targetStage, setTargetStage] = useState(null);
+
+    // NDVI State
+    const [ndviData, setNdviData] = useState([]);
+    const [ndviLoading, setNdviLoading] = useState(false);
+    const [overlayUrl, setOverlayUrl] = useState(null);
+    const [availableImages, setAvailableImages] = useState([]);
+
+    // Fetch NDVI Data when Zone is selected
+    useEffect(() => {
+        if (currentZone && currentFarm) {
+            fetchNdviData();
+        } else {
+            setNdviData([]);
+            setOverlayUrl(null);
+        }
+    }, [currentZone, currentFarm]);
+
+    const fetchNdviData = async () => {
+        if (!currentZone) return;
+        setNdviLoading(true);
+        try {
+            // 1. Check if zone has agromonitoring_id
+            let polyId = currentZone.agromonitoringId;
+
+            // 2. If not, try to create it (or find it - strict create for now)
+            if (!polyId && currentZone.coordinates) {
+                console.log("Creating polygon for NDVI tracking...", currentZone.name);
+                let coords = typeof currentZone.coordinates === 'string' ? JSON.parse(currentZone.coordinates) : currentZone.coordinates;
+                // Handle Leaflet L.LatLng object or array
+                // The API service expects [[lat, lng], ...]
+                // Ensure coords is a flat array of points
+                if (Array.isArray(coords) && coords.length > 0 && Array.isArray(coords[0])) {
+                    // Valid
+                } else {
+                    console.warn("Invalid coordinates for NDVI", coords);
+                    setNdviLoading(false);
+                    return;
+                }
+
+                try {
+                    polyId = await ndviApi.createPolygon(currentZone.name, coords);
+                    if (polyId) {
+                        // Save it back to our DB
+                        await api.updateZone(currentZone.id, { agromonitoringId: polyId });
+                        // Update local state is tricky without context reload, but let's assume it works for next fetch
+                        // Or manually update currentZone object if possible? 
+                        // We can't mutate currentZone directly as it comes from context.
+                        // We will proceed with polyId.
+                    }
+                } catch (e) {
+                    console.error("Failed to create polygon:", e);
+                }
+            }
+
+            if (polyId) {
+                const now = new Date();
+                const sixMonthsAgo = subMonths(now, 6);
+
+                // Fetch History
+                const history = await ndviApi.getNDVIHistory(polyId, sixMonthsAgo, now);
+                setNdviData(history);
+
+                // Fetch Images (for overlay)
+                const images = await ndviApi.searchSatelliteImages(polyId, sixMonthsAgo, now);
+                setAvailableImages(images);
+
+                // Set default overlay to most recent low-cloud image
+                const bestImage = images.find(img => (img.cl || 100) < 20); // < 20% clouds
+                if (bestImage) {
+                    const tileUrl = ndviApi.getTileUrl(bestImage); // We need to implement this in ndviApi properly or here
+                    // Wait, ndviApi.getTileUrl returns a template?
+                    // Let's check ndviApi.js implementation again.
+                    // It returns `${BASE_URL}/image/{z}/{x}/{y}?id=${imageObject.id}&appid=${API_KEY}&paletteid=1`
+                    setOverlayUrl(tileUrl);
+                }
+            }
+
+        } catch (error) {
+            console.error("NDVI Fetch Error:", error);
+        } finally {
+            setNdviLoading(false);
+        }
+    };
 
     useEffect(() => {
         if (currentFarm) {
@@ -395,9 +480,9 @@ export const Dashboard = () => {
                 </div>
             </div>
 
-            {/* Top Section: Stats & Weather */}
+            {/* Main Dashboard Layout */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Left Column: Stats & Progress */}
+                {/* Left Column: Stats, Progress, Activity */}
                 <div className="lg:col-span-2 space-y-6">
                     {/* Stats Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -426,8 +511,6 @@ export const Dashboard = () => {
                             color="bg-blue-500"
                         />
                     </div>
-
-
 
                     {/* Zone Breakdown (Only in Farm View) */}
                     {!currentCycle && zones.length > 0 && (
@@ -464,10 +547,71 @@ export const Dashboard = () => {
                             onStageClick={handleStageClick}
                         />
                     )}
+
+                    {/* NDVI Growth Tracking */}
+                    {currentZone && (
+                        <div className="card">
+                            <h3 className="font-bold text-gray-900 dark:text-white mb-6 flex items-center justify-between">
+                                <span className="flex items-center gap-2">
+                                    <span className="bg-green-100 dark:bg-green-900/30 p-1.5 rounded-lg text-green-600 dark:text-green-400">
+                                        <Sprout size={18} />
+                                    </span>
+                                    Growth Tracking (NDVI)
+                                </span>
+                                {overlayUrl && (
+                                    <span className="text-xs bg-green-50 text-green-700 px-2 py-1 rounded-full border border-green-200">
+                                        Satellite Overlay Active
+                                    </span>
+                                )}
+                            </h3>
+                            <div className="h-72">
+                                <NDVIChart data={ndviData} isLoading={ndviLoading} />
+                            </div>
+                            <p className="text-xs text-center text-gray-400 mt-2">
+                                Data provided by Sentinel-2 Satellite. Updates every 2-5 days.
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Recent Activity */}
+                    <div className="card">
+                        <h3 className="font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+                            <span className="bg-primary-100 dark:bg-primary-900/30 p-1.5 rounded-lg text-primary-600 dark:text-primary-400">
+                                <DollarSign size={18} />
+                            </span>
+                            Recent Activity
+                        </h3>
+                        <div className="space-y-3">
+                            {expenses.slice(0, 5).map(expense => (
+                                <div key={expense.id} className="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-colors border border-transparent hover:border-gray-100 dark:hover:border-gray-700 group">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-10 h-10 rounded-full bg-primary-50 dark:bg-primary-900/30 flex items-center justify-center text-primary-600 dark:text-primary-400 font-bold group-hover:bg-primary-100 transition-colors">
+                                            ₱
+                                        </div>
+                                        <div>
+                                            <p className="font-semibold text-gray-900 dark:text-white group-hover:text-primary-700 transition-colors">{expense.description || expense.category}</p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">{new Date(expense.date).toLocaleDateString()}</p>
+                                        </div>
+                                    </div>
+                                    <span className="font-bold text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 px-3 py-1 rounded-lg border border-gray-100 dark:border-gray-700">
+                                        ₱{Number(expense.amount).toLocaleString()}
+                                    </span>
+                                </div>
+                            ))}
+                            {expenses.length === 0 && (
+                                <div className="text-center py-8">
+                                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 mb-3">
+                                        <DollarSign size={24} />
+                                    </div>
+                                    <p className="text-gray-500">No recent activity.</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
 
-                {/* Right Column: Weather */}
-                <div className="lg:col-span-1">
+                {/* Right Column: Weather, Map, Calendar */}
+                <div className="lg:col-span-1 space-y-6">
                     <WeatherWidget
                         coordinates={(() => {
                             if (currentFarm?.coordinates) {
@@ -475,7 +619,6 @@ export const Dashboard = () => {
                                     const parsed = typeof currentFarm.coordinates === 'string'
                                         ? JSON.parse(currentFarm.coordinates)
                                         : currentFarm.coordinates;
-                                    // Handle array [lat, lng] or object {lat, lng}
                                     if (Array.isArray(parsed)) {
                                         return { lat: parsed[0], long: parsed[1] };
                                     }
@@ -491,7 +634,7 @@ export const Dashboard = () => {
                     />
 
                     {/* Mini Map */}
-                    <div className="mt-6 card p-0 overflow-hidden border-0 shadow-sm">
+                    <div className="card p-0 overflow-hidden border-0 shadow-sm">
                         <div className="p-4 flex items-center justify-between border-b border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800">
                             <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
                                 <MapIcon size={18} className="text-primary-500" />
@@ -537,6 +680,7 @@ export const Dashboard = () => {
                                 onZoneDoubleClick={(zone) => {
                                     enterZone(zone);
                                 }}
+                                overlayUrl={overlayUrl}
                             />
                             {/* Overlay */}
                             <div className="absolute inset-0 bg-primary-900/0 group-hover:bg-primary-900/10 transition-colors flex items-center justify-center pointer-events-none">
@@ -546,48 +690,8 @@ export const Dashboard = () => {
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Recent Activity */}
-                <div className="lg:col-span-2 card">
-                    <h3 className="font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-                        <span className="bg-primary-100 dark:bg-primary-900/30 p-1.5 rounded-lg text-primary-600 dark:text-primary-400">
-                            <DollarSign size={18} />
-                        </span>
-                        Recent Activity
-                    </h3>
-                    <div className="space-y-3">
-                        {expenses.slice(0, 5).map(expense => (
-                            <div key={expense.id} className="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-colors border border-transparent hover:border-gray-100 dark:hover:border-gray-700 group">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-full bg-primary-50 dark:bg-primary-900/30 flex items-center justify-center text-primary-600 dark:text-primary-400 font-bold group-hover:bg-primary-100 transition-colors">
-                                        ₱
-                                    </div>
-                                    <div>
-                                        <p className="font-semibold text-gray-900 dark:text-white group-hover:text-primary-700 transition-colors">{expense.description || expense.category}</p>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400">{new Date(expense.date).toLocaleDateString()}</p>
-                                    </div>
-                                </div>
-                                <span className="font-bold text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 px-3 py-1 rounded-lg border border-gray-100 dark:border-gray-700">
-                                    ₱{Number(expense.amount).toLocaleString()}
-                                </span>
-                            </div>
-                        ))}
-                        {expenses.length === 0 && (
-                            <div className="text-center py-8">
-                                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 mb-3">
-                                    <DollarSign size={24} />
-                                </div>
-                                <p className="text-gray-500">No recent activity.</p>
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                {/* Calendar */}
-                <div className="lg:col-span-1">
+                    {/* Calendar */}
                     <Calendar expenses={expenses} />
                 </div>
             </div>
@@ -662,6 +766,7 @@ export const Dashboard = () => {
                             enterZone(zone);
                             setIsMapModalOpen(false);
                         }}
+                        overlayUrl={overlayUrl}
                     />
                 </div>
             </Modal>
@@ -832,3 +937,5 @@ const EndCycleModal = ({ isOpen, onClose, cycle }) => {
         </Modal>
     );
 };
+
+export default Dashboard;

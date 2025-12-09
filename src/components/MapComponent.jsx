@@ -94,7 +94,8 @@ const MapComponent = ({
     onLocationSelect,
     farmLocation,
     onZoneDoubleClick,
-    autoFitBounds = false
+    autoFitBounds = false,
+    overlayUrl = null // URL for NDVI/Satellite overlay
 }) => {
     // Default center (can be adjusted or dynamic based on user location)
     const defaultCenter = [10.7, 122.9]; // Approx Negros/Panay area (sugar land)
@@ -135,6 +136,14 @@ const MapComponent = ({
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     opacity={0.3} // Overlay labels/roads slightly
                 />
+
+                {overlayUrl && (
+                    <TileLayer
+                        url={overlayUrl}
+                        opacity={0.7}
+                        zIndex={100}
+                    />
+                )}
 
                 <FeatureGroup>
                     <EditControl
