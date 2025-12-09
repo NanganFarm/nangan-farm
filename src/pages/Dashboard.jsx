@@ -172,6 +172,7 @@ export const Dashboard = () => {
     // NDVI State
     const [ndviData, setNdviData] = useState([]);
     const [ndviLoading, setNdviLoading] = useState(false);
+    const [ndviError, setNdviError] = useState(null);
     const [overlayUrl, setOverlayUrl] = useState(null);
     const [availableImages, setAvailableImages] = useState([]);
 
@@ -182,12 +183,15 @@ export const Dashboard = () => {
         } else {
             setNdviData([]);
             setOverlayUrl(null);
+            setNdviError(null);
         }
     }, [currentZone, currentFarm]);
 
     const fetchNdviData = async () => {
         if (!currentZone) return;
         setNdviLoading(true);
+        setNdviError(null);
+
         try {
             // 1. Check if zone has agromonitoring_id
             let polyId = currentZone.agromonitoringId;
@@ -203,6 +207,7 @@ export const Dashboard = () => {
                     // Valid
                 } else {
                     console.warn("Invalid coordinates for NDVI", coords);
+                    setNdviError("Invalid zone coordinates. Please edit and re-save the zone.");
                     setNdviLoading(false);
                     return;
                 }
@@ -211,14 +216,18 @@ export const Dashboard = () => {
                     polyId = await ndviApi.createPolygon(currentZone.name, coords);
                     if (polyId) {
                         // Save it back to our DB
-                        await api.updateZone(currentZone.id, { agromonitoringId: polyId });
-                        // Update local state is tricky without context reload, but let's assume it works for next fetch
-                        // Or manually update currentZone object if possible? 
-                        // We can't mutate currentZone directly as it comes from context.
-                        // We will proceed with polyId.
+                        try {
+                            await api.updateZone(currentZone.id, { agromonitoringId: polyId });
+                        } catch (dbError) {
+                            console.error("Failed to update zone with polygon ID", dbError);
+                            setNdviError("Database Error: Is 'agromonitoring_id' column missing? Please run migration.");
+                            throw dbError; // rethrow to stop execution
+                        }
                     }
                 } catch (e) {
                     console.error("Failed to create polygon:", e);
+                    if (!ndviError) setNdviError("Failed to register zone with satellite service.");
+                    throw e;
                 }
             }
 
@@ -227,26 +236,40 @@ export const Dashboard = () => {
                 const sixMonthsAgo = subMonths(now, 6);
 
                 // Fetch History
-                const history = await ndviApi.getNDVIHistory(polyId, sixMonthsAgo, now);
-                setNdviData(history);
+                try {
+                    const history = await ndviApi.getNDVIHistory(polyId, sixMonthsAgo, now);
+                    setNdviData(history);
+                } catch (e) {
+                    console.error("Failed to fetch history", e);
+                    // Don't error the whole widget if just history fails, but maybe warn?
+                    setNdviError("Could not fetch NDVI history.");
+                }
 
                 // Fetch Images (for overlay)
-                const images = await ndviApi.searchSatelliteImages(polyId, sixMonthsAgo, now);
-                setAvailableImages(images);
+                try {
+                    const images = await ndviApi.searchSatelliteImages(polyId, sixMonthsAgo, now);
+                    setAvailableImages(images);
 
-                // Set default overlay to most recent low-cloud image
-                const bestImage = images.find(img => (img.cl || 100) < 20); // < 20% clouds
-                if (bestImage) {
-                    const tileUrl = ndviApi.getTileUrl(bestImage); // We need to implement this in ndviApi properly or here
-                    // Wait, ndviApi.getTileUrl returns a template?
-                    // Let's check ndviApi.js implementation again.
-                    // It returns `${BASE_URL}/image/{z}/{x}/{y}?id=${imageObject.id}&appid=${API_KEY}&paletteid=1`
-                    setOverlayUrl(tileUrl);
+                    // Set default overlay to most recent low-cloud image
+                    const bestImage = images.find(img => (img.cl || 100) < 20); // < 20% clouds
+                    if (bestImage) {
+                        const tileUrl = ndviApi.getTileUrl(bestImage);
+                        setOverlayUrl(tileUrl);
+                    }
+                } catch (e) {
+                    console.warn("Failed to fetch images", e);
+                }
+            } else {
+                // If we couldn't get a polyId and didn't error before
+                if (!ndviError && currentZone.coordinates) {
+                    setNdviError("Could not link zone to satellite data.");
                 }
             }
 
         } catch (error) {
             console.error("NDVI Fetch Error:", error);
+            // Error is already set above in most cases, or we set generic here
+            if (!ndviError) setNdviError(error.message || "Unknown error loading satellite data.");
         } finally {
             setNdviLoading(false);
         }
@@ -565,7 +588,7 @@ export const Dashboard = () => {
                                 )}
                             </h3>
                             <div className="h-72">
-                                <NDVIChart data={ndviData} isLoading={ndviLoading} />
+                                <NDVIChart data={ndviData} isLoading={ndviLoading} error={ndviError} />
                             </div>
                             <p className="text-xs text-center text-gray-400 mt-2">
                                 Data provided by Sentinel-2 Satellite. Updates every 2-5 days.
