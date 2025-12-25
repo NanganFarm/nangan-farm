@@ -22,6 +22,7 @@ export const Expenses = () => {
     const [editingExpense, setEditingExpense] = useState(null);
     const [receiptImage, setReceiptImage] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Sorting & Filtering State
     const [sortConfig, setSortConfig] = useState({ key: 'date', direction: 'desc' });
@@ -214,10 +215,12 @@ export const Expenses = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!formData.amount || !formData.category) {
-            alert("Please fill in Amount and Category.");
+        if (!formData.amount || !formData.category || isSubmitting) {
+            if (!formData.amount || !formData.category) alert("Please fill in Amount and Category.");
             return;
         }
+
+        setIsSubmitting(true);
 
         try {
             const expenseData = {
@@ -253,6 +256,8 @@ export const Expenses = () => {
         } catch (error) {
             console.error("Failed to save expense", error);
             alert(`Failed to save expense: ${error.message}`);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -687,9 +692,17 @@ export const Expenses = () => {
                         </button>
                         <button
                             type="submit"
-                            className="btn btn-primary shadow-lg shadow-primary-900/20"
+                            disabled={isSubmitting}
+                            className="btn btn-primary shadow-lg shadow-primary-900/20 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Save Expense
+                            {isSubmitting ? (
+                                <>
+                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                    Saving...
+                                </>
+                            ) : (
+                                "Save Expense"
+                            )}
                         </button>
                     </div>
                 </form>

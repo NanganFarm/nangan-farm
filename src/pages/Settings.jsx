@@ -16,6 +16,7 @@ export const Settings = () => {
     const [cycleToDelete, setCycleToDelete] = useState(null);
     const [editingCategory, setEditingCategory] = useState(null);
     const [formData, setFormData] = useState({ name: '' });
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         loadCategories();
@@ -54,10 +55,17 @@ export const Settings = () => {
     };
 
     const confirmDeleteCycle = async () => {
-        if (cycleToDelete) {
-            await deleteCycle(cycleToDelete.id);
-            setIsDeleteModalOpen(false);
-            setCycleToDelete(null);
+        if (cycleToDelete && !isSubmitting) {
+            setIsSubmitting(true);
+            try {
+                await deleteCycle(cycleToDelete.id);
+                setIsDeleteModalOpen(false);
+                setCycleToDelete(null);
+            } catch (error) {
+                console.error("Failed to delete cycle", error);
+            } finally {
+                setIsSubmitting(false);
+            }
         }
     };
 
@@ -70,10 +78,17 @@ export const Settings = () => {
     };
 
     const confirmDeleteFarm = async () => {
-        if (farmToDelete) {
-            await deleteFarm(farmToDelete.id);
-            setIsFarmDeleteModalOpen(false);
-            setFarmToDelete(null);
+        if (farmToDelete && !isSubmitting) {
+            setIsSubmitting(true);
+            try {
+                await deleteFarm(farmToDelete.id);
+                setIsFarmDeleteModalOpen(false);
+                setFarmToDelete(null);
+            } catch (error) {
+                console.error("Failed to delete farm", error);
+            } finally {
+                setIsSubmitting(false);
+            }
         }
     };
 
@@ -87,21 +102,25 @@ export const Settings = () => {
 
     const handleUpdateFarm = async (e) => {
         e.preventDefault();
-        if (!farmFormData.name.trim() || !currentFarm) return;
+        if (!farmFormData.name.trim() || !currentFarm || isSubmitting) return;
 
+        setIsSubmitting(true);
         try {
             await updateFarm(currentFarm.id, { name: farmFormData.name });
             setIsEditFarmModalOpen(false);
             setFarmFormData({ name: '' });
         } catch (error) {
             console.error("Failed to update farm", error);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!formData.name.trim()) return;
+        if (!formData.name.trim() || isSubmitting) return;
 
+        setIsSubmitting(true);
         try {
             if (editingCategory) {
                 await api.updateCategory(editingCategory.id, { name: formData.name });
@@ -116,6 +135,8 @@ export const Settings = () => {
             setFormData({ name: '' });
         } catch (error) {
             console.error("Failed to save category", error);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -440,8 +461,8 @@ export const Settings = () => {
                         >
                             Cancel
                         </button>
-                        <button type="submit" className="btn btn-primary shadow-lg shadow-primary-900/20">
-                            Save Category
+                        <button type="submit" disabled={isSubmitting} className="btn btn-primary shadow-lg shadow-primary-900/20 flex items-center gap-2 disabled:opacity-50">
+                            {isSubmitting ? "Saving..." : "Save Category"}
                         </button>
                     </div>
                 </form>
@@ -475,9 +496,10 @@ export const Settings = () => {
                         </button>
                         <button
                             onClick={confirmDeleteCycle}
-                            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-lg shadow-red-900/20"
+                            disabled={isSubmitting}
+                            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-lg shadow-red-900/20 disabled:opacity-50"
                         >
-                            Delete Cycle
+                            {isSubmitting ? "Deleting..." : "Delete Cycle"}
                         </button>
                     </div>
                 </div>
@@ -510,9 +532,10 @@ export const Settings = () => {
                         </button>
                         <button
                             onClick={confirmDeleteFarm}
-                            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-lg shadow-red-900/20"
+                            disabled={isSubmitting}
+                            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-lg shadow-red-900/20 disabled:opacity-50"
                         >
-                            Delete Farm
+                            {isSubmitting ? "Deleting..." : "Delete Farm"}
                         </button>
                     </div>
                 </div>
@@ -544,8 +567,8 @@ export const Settings = () => {
                         >
                             Cancel
                         </button>
-                        <button type="submit" className="btn btn-primary shadow-lg shadow-primary-900/20">
-                            Save Changes
+                        <button type="submit" disabled={isSubmitting} className="btn btn-primary shadow-lg shadow-primary-900/20 flex items-center gap-2 disabled:opacity-50">
+                            {isSubmitting ? "Saving..." : "Save Changes"}
                         </button>
                     </div>
                 </form>

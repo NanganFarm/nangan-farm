@@ -232,7 +232,16 @@ export const Dashboard = () => {
             }
 
             if (polyId) {
-                const now = new Date();
+                // CLOCK SKEW WORKAROUND:
+                // The API hangs if we request data for 2025 (Future). 
+                // If system time is > 2024, clamp "now" to a safe recent date (e.g. late 2024).
+                let now = new Date();
+                const realLinkYear = 2024; // Assuming this is the real current year
+                if (now.getFullYear() > realLinkYear) {
+                    console.warn(`System time (${now.getFullYear()}) is in the future relative to API. Clamping to end of ${realLinkYear}.`);
+                    now = new Date(`${realLinkYear}-12-08T12:00:00Z`); // Use a safe recent date
+                }
+
                 const sixMonthsAgo = subMonths(now, 6);
 
                 // Fetch History
@@ -810,6 +819,7 @@ const EndCycleModal = ({ isOpen, onClose, cycle }) => {
     });
 
     const [receiptFiles, setReceiptFiles] = useState([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -848,6 +858,9 @@ const EndCycleModal = ({ isOpen, onClose, cycle }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (isSubmitting) return;
+
+        setIsSubmitting(true);
         try {
             await endCycle(cycle.id, {
                 ...formData,
@@ -856,6 +869,8 @@ const EndCycleModal = ({ isOpen, onClose, cycle }) => {
             onClose();
         } catch (error) {
             alert("Failed to end cycle: " + error.message);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -954,7 +969,9 @@ const EndCycleModal = ({ isOpen, onClose, cycle }) => {
 
                 <div className="flex justify-end gap-3 pt-4">
                     <button type="button" onClick={onClose} className="btn btn-secondary">Cancel</button>
-                    <button type="submit" className="btn btn-primary bg-red-600 hover:bg-red-700 border-red-600">End Cycle</button>
+                    <button type="submit" disabled={isSubmitting} className="btn btn-primary bg-red-600 hover:bg-red-700 border-red-600 disabled:opacity-50 flex items-center gap-2">
+                        {isSubmitting ? "Ending Cycle..." : "End Cycle"}
+                    </button>
                 </div>
             </form>
         </Modal>

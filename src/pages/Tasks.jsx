@@ -85,6 +85,7 @@ export const Tasks = () => {
         priority: 'medium',
         zoneId: ''
     });
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         if (currentFarm) {
@@ -106,6 +107,9 @@ export const Tasks = () => {
 
     const handleAddTask = async (e) => {
         e.preventDefault();
+        if (isSubmitting) return;
+
+        setIsSubmitting(true);
         try {
             await api.addTask({
                 ...newTask,
@@ -117,6 +121,8 @@ export const Tasks = () => {
             loadTasks();
         } catch (error) {
             alert("Failed to add task: " + error.message);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -276,7 +282,9 @@ export const Tasks = () => {
                     </div>
                     <div className="flex justify-end gap-3 pt-4">
                         <button type="button" onClick={() => setIsModalOpen(false)} className="btn btn-secondary">Cancel</button>
-                        <button type="submit" className="btn btn-primary">Create Task</button>
+                        <button type="submit" disabled={isSubmitting} className="btn btn-primary flex items-center gap-2">
+                            {isSubmitting ? "Creating..." : "Create Task"}
+                        </button>
                     </div>
                 </form>
             </Modal>
